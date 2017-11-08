@@ -1,2 +1,2 @@
-# PadSpotter
-Helps find a home based on a set of constraints
+# RayTracker
+Helps visualize data generated from ray tracers!
