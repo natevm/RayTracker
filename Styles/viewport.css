@@ -1,0 +1,15 @@
+/*#viewport-img {
+	width: 99.9%;
+	height: 99.9%;
+}*/
+
+.overlay {
+  fill: none;
+  pointer-events: all;
+}
+
+.brush {
+	fill: rgba(0, 0, 0, .3);
+	stroke-width: 3;
+	stroke: rgb(0,0,0);
+}

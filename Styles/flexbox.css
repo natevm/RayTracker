@@ -1,8 +1,4 @@
 /* Columns for Sidebar, Viewport, and Pixel Analysis Chart */
-body {
-	background-color: black;
-}
-
 @media screen and (orientation:portrait) {
 	#main-container {
 		display: flex;
@@ -13,53 +9,47 @@ body {
 	}
 
 	#sidebar{
-		background-color: red;
 		flex-basis: 50px;
 	}
 
 	#viewport-column {
-		background-color: green;
 		/*flex-basis: 50%;*/
 		width: 100vmin;
-		height: 105vmin;
+		height: 110vmin;
 	}
 
 	#pixel-analysis-column{
-		background-color: blue;
 		/*flex-basis: 50%;*/
 		width: 100vmin;
-		height: 105vmin;
+		height: 110vmin;
 	}
 }
-
 @media screen and (orientation:landscape) { 
 	#main-container {
 		display: flex;
 		flex-direction: row;
 		align-items: center;
+		justify-content: center;
 		margin: 0px;
 		/*width: 100%;*/
 		/*height: 100%;*/
 	}
 
 	#sidebar{
-		background-color: red;
 		width: 10vw;
-		height: 50vw;
+		height: 40vw;
 	}
 
 	#viewport-column {
-		background-color: green;
 		/*flex-basis: 50%;*/
-		width: 45vw;
-		height: 50vw;
+		width: 40vw;
+		height: 45vw;
 	}
 
 	#pixel-analysis-column{
-		background-color: blue;
 		/*flex-basis: 50%;*/
-		width: 45vw;
-		height: 50vw;
+		width: 40vw;
+		height: 45vw;
 	}
 }
 
@@ -74,7 +64,6 @@ body {
 
 	#help-toggle {
 		flex-basis: 10vw;
-		background-color: red;
 
 		display: flex;
 		justify-content: center;
@@ -82,7 +71,6 @@ body {
 	}
 	#pixel-view-toggle{
 		flex-basis: 50%;
-		background-color: blue;
 
 		display: flex;
 		justify-content: center;
@@ -90,7 +78,6 @@ body {
 	}
 	#three-d-view-toggle{
 		flex-basis: 50%;
-		background-color: green;
 
 		display: flex;	
 		justify-content: center;
@@ -102,29 +89,26 @@ body {
 	#sidebar {
 		display: flex;
 		flex-direction: column;
-		height: 50vw;
+		height: 45vw;
 		/*justify-content: space-evenly;*/
 	}
 
 	#help-toggle {
 		flex-basis: 5vw;
-		background-color: red;
 
 		display: flex;
 		justify-content: center;
 		align-items: center;
 	}
 	#pixel-view-toggle{
-		flex-basis: 22.5vw;
-		background-color: blue;
+		flex-basis: 20vw;
 
 		display: flex;
 		justify-content: center;
 		align-items: center;
 	}
 	#three-d-view-toggle{
-		flex-basis: 22.5vw;
-		background-color: green;
+		flex-basis: 20vw;
 
 		display: flex;	
 		justify-content: center;
@@ -139,15 +123,14 @@ body {
 		flex-direction: column;
 	}
 	#viewport-options {
-		background-color: red;
-		flex-basis: 5vw;
+		flex-basis: 10vw;
 
 		display: flex;
 		justify-content: center;
 		align-items: center;
 	}
 	#viewport {
-		background-color: blue;
+	
 		width: 100vw;
 		height: 100vw;
 		
@@ -163,7 +146,6 @@ body {
 		flex-direction: column;
 	}
 	#viewport-options {
-		background-color: red;
 		flex-basis: 5vw;
 
 		display: flex;
@@ -171,9 +153,8 @@ body {
 		align-items: center;
 	}
 	#viewport {
-		background-color: blue;
-		width: 45vw;
-		height: 45vw;
+		width: 40vw;
+		height: 40vw;
 		/*height: 100%;*/
 		
 		display: flex;
@@ -189,15 +170,13 @@ body {
 		flex-direction: column;
 	}
 	#pixel-analysis-options {
-		background-color: red;
-		flex-basis: 5vw;
+		flex-basis: 10vw;
 
 		display: flex;
 		justify-content: center;
 		align-items: center;
 	}
 	#bar-chart {
-		background-color: blue;
 		width: 100vw;
 		height: 50vw;
 		
@@ -206,7 +185,6 @@ body {
 		align-items: center;
 	}
 	#tree-view {
-		background-color: green;
 		width: 100vw;
 		height: 50vw;
 		
@@ -222,7 +200,6 @@ body {
 		flex-direction: column;
 	}
 	#pixel-analysis-options {
-		background-color: red;
 		flex-basis: 5vw;
 
 		display: flex;
@@ -230,9 +207,8 @@ body {
 		align-items: center;
 	}
 	#bar-chart {
-		background-color: blue;
-		width: 45vw;
-		height: 22.5vw;
+		width: 40vw;
+		height: 20vw;
 		/*height: 100%;*/
 		
 		display: flex;
@@ -240,9 +216,8 @@ body {
 		align-items: center;
 	}
 	#tree-view {
-		background-color: green;
-		width: 45vw;
-		height: 22.5vw;
+		width: 40vw;
+		height: 20vw;
 		
 		display: flex;
 		justify-content: center;
