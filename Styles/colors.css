@@ -1,0 +1,16 @@
+:root {
+	--main-bg-color: #1c1d26;
+	--transparent-color1: rgba(39, 40, 51, 0.965);
+}
+
+body {
+	background-color: var(--main-bg-color);
+}
+
+#help-toggle, #viewport-options, #pixel-view-toggle, 
+#three-d-view-toggle, #pixel-analysis-options, 
+#bar-chart, #tree-view  {
+	background-color: var(--transparent-color1);
+	/*box-shadow: 0 0 0.25em 0 rgba(0, 0, 0, 0.25);*/
+	margin: 1px;
+}
