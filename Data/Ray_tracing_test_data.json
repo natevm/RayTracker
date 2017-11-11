@@ -49,11 +49,11 @@
 		"Color":[255,0,0, 0,255,0, 0,0,255, 50,50,50],
 		"_comment2":"flat array of render times for pixels. 1 for each pixel. Times are in milliseconds.",
 		"Render_time":[0.01, 0.02, 0.01, 0.005],
-		"Secondary_rays":[2,3,3,2],	//TODO: Make these real
+		"Secondary_rays":[2,3,3,2],
 		"Sample_count":[1,1,1,2],
 		"Depth_buffer":[10.5,11,10.75,11.1],
 		"Variance":[0.05,0.045,0.001,0.01]
-	}
+	},
 	"RayData":[
 		[
 			{
@@ -260,6 +260,5 @@
 				]
 			}
 		]
-	],
-	
+	]	
 }
