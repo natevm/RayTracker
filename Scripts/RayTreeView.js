@@ -19,6 +19,12 @@ class RayTreeView {
 		//clear the svg
 		this.svg.selectAll("g#tree > g.node").remove();
 		this.svg.selectAll("g#tree > path.link").remove();
+
+		/* concept art TEMPORARY */
+		this.svg.selectAll("image").remove();
+		this.image = this.svg.append("image");
+		this.image.attr("xlink:href", "./Sketches/Vis4DataSci1tree.png");
+		this.image.attr("height", this.height).attr("width", this.width);
 		
 		//if _sampleIdx is undefined
 		if(_sampleIdx === undefined){
