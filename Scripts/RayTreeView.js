@@ -76,7 +76,9 @@ class RayTreeView {
 			.attr('class', 'link')
 			.attr('d', function(d){
 				return diagonal(d, d.parent);
-			});
+			})
+			.attr("fill", "transparent")
+			.attr("stroke", "white");
 		this.link = this.link.merge(linkEnter);
 		
 		function diagonal(s, d){
