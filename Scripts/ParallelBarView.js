@@ -10,78 +10,213 @@ class ParallelBarView {
 		this.width = $("#bar-chart").width();
     	this.height = $("#bar-chart").height();
 		this.svg.attr("width", this.width).attr("height", this.height);
+
+		this.totalBars = 7; // Currently only 7 characteristics
 	};
 
-	update() {
-		let self = this;
-		let svg = this.svg;
+	sanitize(bounds, dimensions) {
+		bounds[0] = Math.min(bounds[0], dimensions[0]);
+		bounds[1] = Math.min(bounds[1], dimensions[1]);
+		bounds[2] = Math.min(bounds[2], dimensions[0]);
+		bounds[3] = Math.min(bounds[3], dimensions[1]);
 
-		svg.selectAll("g").remove();
-		svg.selectAll("rect").remove();
-		
-		/* concept art */
-		svg.selectAll("image").remove();
-		this.image = svg.append("image");
-		this.image.attr("xlink:href", "./Sketches/Vis4DataSci1bars.png");
-		this.image.attr("height", this.height).attr("width", this.width);
+		bounds[0] = Math.max(bounds[0], 0);
+		bounds[1] = Math.max(bounds[1], 0);
+		bounds[2] = Math.max(bounds[2], 0);
+		bounds[3] = Math.max(bounds[3], 0);
+	}
 
-		/* TEMPORARY RECTANGLES */
-		// <rect x="10" y="10" width="100" height="100"/>
-		let totalRects = 7;
-		let totalPixels = 16;
+	update(bounds) {
+		if (this.rawData != null) {
+			this.sanitize(bounds, this.rawData.dimensions);
+			
+			let self = this;
+			let svg = this.svg;
 
-		for (let i = 0; i < totalRects; ++i) {
-			for (let j = 0; j < totalPixels; ++j) {
-				svg.append("rect")
-					.attr("x", (this.width / totalRects) * i)
-					.attr("y", (this.height / totalPixels) * j)
-					.attr("width", this.width / (totalRects * 2))
-					.attr("height", this.height / (totalPixels))
-					.attr("fill", "rgba(0, 0, 0, 0.3)");
+			svg.selectAll("g").remove();
+			svg.selectAll("rect").remove();
+			
+			this.updateColors(bounds);
+			this.updateTimes(bounds);
+			this.updateSecondaryRays(bounds);
+			this.updateSampleCounts(bounds);
+			this.updateDepths(bounds);
+			this.updateVariances(bounds);
+		}
+	}
 
-				//<line x1="20" y1="100" x2="100" y2="20" stroke-width="2" stroke="black"/>
-				svg.append("line")
-					.attr("x1", (this.width / totalRects) * i)
-					.attr("y1", (this.height / totalPixels) * j)
-					.attr("x2", ((this.width / totalRects) * i) +((this.width / totalRects) * i + 1)  )
-					.attr("y2", (this.height / totalPixels) * j)
-					.attr("stroke-width", 2)
-					.attr("stroke", "rgba(0, 0, 0, 0.3)");
+	updateColors(bounds) {
+		let colors = [];
+		for (let y = bounds[1]; y < bounds[3]; ++y) {
+			for (let x = bounds[0]; x < bounds[2]; ++x) {
+				let color = {
+					"red" : -1,
+					"blue" : -1,
+					"green" : -1
+				};
+				color.red = this.rawData.Color[3 * (x + y * this.rawData.dimensions[0])];
+				color.blue = this.rawData.Color[3 * (x + y * this.rawData.dimensions[0]) + 1];
+				color.green = this.rawData.Color[3 * (x + y * this.rawData.dimensions[0]) + 2];
+
+				colors.push(color);
 			}
 		}
 
+		let group = this.svg.append("g");
+		let colorGroup = group.append("g");
 
-		// <img src="./Sketches/Vis4DataSci1bars.png"/>
-		// let width = this.width;
-		// let height = this.height;
+		let colorRects = colorGroup.selectAll("rect").data(colors);
+		colorRects.exit().remove();
+		let enterColorRects = colorRects.enter().append("rect");
+		let allColorRects = enterColorRects.merge(colorRects);
 
-		// let scale0 = 1;
-		// let translate0 = [0,0];
+		allColorRects
+			.attr("x", (d, i) => {return 0})
+			.attr("y", (d, i) => {return (i / colors.length) * this.height})
+			.attr("width", (d, i) => {return 100})
+			.attr("height", (d, i) => {return (1 / colors.length) * this.height})
+			.style("fill", (d, i) => {return d3.rgb(d.red,d.blue,d.green);});
+	}
 
-		// svg.append("rect")
-		// 		.attr("class", "overlay") // class not used yet
-		// 		.attr("width", width + "px")
-		// 		.attr("height", height + "px");
+	updateTimes(bounds) {
+		var color = d3.scaleLinear()
+			.domain([this.rawData.min_render_time, this.rawData.max_render_time])
+            .range(['white','red']);
 
-		// let group = svg.append("g")
-		// 		.attr("transform", "translate(" + translate0 +")scale(" + scale0 + ")");
+		let times = [];
+		for (let y = bounds[1]; y < bounds[3]; ++y) {
+			for (let x = bounds[0]; x < bounds[2]; ++x) {
+				times.push(this.rawData.Render_time[x + y * this.rawData.dimensions[0]]);
+			}
+		}
 
-		// svg.call(d3.zoom().scaleExtent([1,10]).on("zoom", () => {
-		// 		group.attr("transform", d3.event.transform)
-		// 		self.brush(d3.event.transform);
-		// 	}
-		// ));
+		let group = this.svg.append("g");
+		let timeGroup = group.append("g");
 
-		// this.image = group.append("image");
-		// this.image.attr("xlink:href", "./Data/Images/Image.png");
-		// this.image.attr("height", height).attr("width", width);
-		
-		// svg.append("rect")
-		// 	.attr("class", "brush")
-		// 	.attr("width", this.width / 5)
-		// 	.attr("height", this.height / 5)
-		// 	.attr("x", this.width * 2 / 5)
-		// 	.attr("y", this.height * 2/ 5);
+		let timeRects = timeGroup.selectAll("rect").data(times);
+		timeRects.exit().remove();
+		let enterTimeRects = timeRects.enter().append("rect");
+		let allTimeRects = enterTimeRects.merge(timeRects);
+
+		allTimeRects
+			.attr("x", (d, i) => {return 100})
+			.attr("y", (d, i) => {return (i / times.length) * this.height})
+			.attr("width", (d, i) => {return 100})
+			.attr("height", (d, i) => {return (1 / times.length) * this.height})
+			.style("fill", (d, i) => {return color(d);});
+	}
+
+	updateSecondaryRays(bounds) {
+		var color = d3.scaleLinear()
+			.domain([this.rawData.min_secondary_rays, this.rawData.max_secondary_rays])
+            .range(['white','red']);
+
+		let secondaryRays = [];
+		for (let y = bounds[1]; y < bounds[3]; ++y) {
+			for (let x = bounds[0]; x < bounds[2]; ++x) {
+				secondaryRays.push(this.rawData.Secondary_rays[x + y * this.rawData.dimensions[0]]);
+			}
+		}
+
+		let group = this.svg.append("g");
+		let secondaryRayGroup = group.append("g");
+
+		let secondaryRayRects = secondaryRayGroup.selectAll("rect").data(secondaryRays);
+		secondaryRayRects.exit().remove();
+		let enterSecondaryRayRects = secondaryRayRects.enter().append("rect");
+		let allSecondaryRayRects = enterSecondaryRayRects.merge(secondaryRayRects);
+
+		allSecondaryRayRects
+			.attr("x", (d, i) => {return 200})
+			.attr("y", (d, i) => {return (i / secondaryRays.length) * this.height})
+			.attr("width", (d, i) => {return 100})
+			.attr("height", (d, i) => {return (1 / secondaryRays.length) * this.height})
+			.style("fill", (d, i) => {return color(d);});
+	}
+	
+	updateSampleCounts(bounds) {
+		var color = d3.scaleLinear()
+			.domain([this.rawData.min_sample_count, this.rawData.max_sample_count])
+            .range(['white','red']);
+
+		let sampleCounts = [];
+		for (let y = bounds[1]; y < bounds[3]; ++y) {
+			for (let x = bounds[0]; x < bounds[2]; ++x) {
+				sampleCounts.push(this.rawData.Sample_count[x + y * this.rawData.dimensions[0]]);
+			}
+		}
+
+		let group = this.svg.append("g");
+		let sampleCountGroup = group.append("g");
+
+		let sampleCountRects = sampleCountGroup.selectAll("rect").data(sampleCounts);
+		sampleCountRects.exit().remove();
+		let enterSampleCountRects = sampleCountRects.enter().append("rect");
+		let allSampleCountRects = enterSampleCountRects.merge(sampleCountRects);
+
+		allSampleCountRects
+			.attr("x", (d, i) => {return 300})
+			.attr("y", (d, i) => {return (i / sampleCounts.length) * this.height})
+			.attr("width", (d, i) => {return 100})
+			.attr("height", (d, i) => {return (1 / sampleCounts.length) * this.height})
+			.style("fill", (d, i) => {return color(d);});
+	}
+
+	updateDepths(bounds) {
+		var color = d3.scaleLinear()
+			.domain([this.rawData.min_depth, this.rawData.max_depth])
+            .range(['white','red']);
+
+		let depths = [];
+		for (let y = bounds[1]; y < bounds[3]; ++y) {
+			for (let x = bounds[0]; x < bounds[2]; ++x) {
+				depths.push(this.rawData.Depth_buffer[x + y * this.rawData.dimensions[0]]);
+			}
+		}
+
+		let group = this.svg.append("g");
+		let depthGroup = group.append("g");
+
+		let depthRects = depthGroup.selectAll("rect").data(depths);
+		depthRects.exit().remove();
+		let enterDepthRects = depthRects.enter().append("rect");
+		let allDepthRects = enterDepthRects.merge(depthRects);
+
+		allDepthRects
+			.attr("x", (d, i) => {return 400})
+			.attr("y", (d, i) => {return (i / depths.length) * this.height})
+			.attr("width", (d, i) => {return 100})
+			.attr("height", (d, i) => {return (1 / depths.length) * this.height})
+			.style("fill", (d, i) => {return color(d);});
+	}
+
+
+	updateVariances(bounds){
+		var color = d3.scaleLinear()
+			.domain([this.rawData.min_variance, this.rawData.max_variance])
+            .range(['white','red']);
+
+		let variances = [];
+		for (let y = bounds[1]; y < bounds[3]; ++y) {
+			for (let x = bounds[0]; x < bounds[2]; ++x) {
+				variances.push(this.rawData.Variance[x + y * this.rawData.dimensions[0]]);
+			}
+		}
+
+		let group = this.svg.append("g");
+		let varianceGroup = group.append("g");
+
+		let varianceRects = varianceGroup.selectAll("rect").data(variances);
+		varianceRects.exit().remove();
+		let enterVarianceRects = varianceRects.enter().append("rect");
+		let allVarianceRects = enterVarianceRects.merge(varianceRects);
+
+		allVarianceRects
+			.attr("x", (d, i) => {return 500})
+			.attr("y", (d, i) => {return (i / variances.length) * this.height})
+			.attr("width", (d, i) => {return 100})
+			.attr("height", (d, i) => {return (1 / variances.length) * this.height})
+			.style("fill", (d, i) => {return color(d);});
 	}
 
 	resize() {

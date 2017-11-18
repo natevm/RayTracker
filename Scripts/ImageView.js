@@ -4,17 +4,20 @@
 	and brushing pixels for analysis.
 */
 class ImageView {
-	constructor() {
+	constructor(parallelBarView) {
+		this.parallelBarView = parallelBarView;
 		this.viewportDiv = d3.select("#viewport");
 		this.svg = this.viewportDiv.append("svg");
 		this.width = $("#viewport").width();
     	this.height = $("#viewport").height();
-    	this.imgWidth = 256; 
-    	this.imgHeight = 256; 
+    	this.imgWidth = 64; 
+    	this.imgHeight = 64; 
 		this.svg.attr("width", this.width).attr("height", this.height);
 	};
 
 	update() {
+		console.log(this.parallelBarView)
+
 		let self = this;
 		let svg = this.svg;
 
@@ -42,7 +45,7 @@ class ImageView {
 		));
 
 		this.image = group.append("image");
-		this.image.attr("xlink:href", "./Data/Images/Image.png");
+		this.image.attr("xlink:href", "./Data/64/render.png");
 		this.image.attr("height", height).attr("width", width);
 		
 		svg.append("rect")
@@ -55,19 +58,21 @@ class ImageView {
 
 	brush(transform) {
 		/* Don't ask me to explain this. ( sorry future self. ;( ) */
-		let x0 = (((((2/5) * $("#viewport").width())  - transform.x) / transform.k) / $("#viewport").width())  * 256;
-		let y0 = (((((2/5) * $("#viewport").height()) - transform.y) / transform.k) / $("#viewport").height()) * 256;
+		let x0 = (((((2/5) * $("#viewport").width())  - transform.x) / transform.k) / $("#viewport").width())  * 64;
+		let y0 = (((((2/5) * $("#viewport").height()) - transform.y) / transform.k) / $("#viewport").height()) * 64;
 
-		let x1 = (((((3/5) * $("#viewport").width())  - transform.x) / transform.k) / $("#viewport").width())  * 256;
-		let y1 = (((((3/5) * $("#viewport").height()) - transform.y) / transform.k) / $("#viewport").height()) * 256;
+		let x1 = (((((3/5) * $("#viewport").width())  - transform.x) / transform.k) / $("#viewport").width())  * 64;
+		let y1 = (((((3/5) * $("#viewport").height()) - transform.y) / transform.k) / $("#viewport").height()) * 64;
 
-		x0 = Math.floor(x0);
-		y0 = Math.floor(y0);
+		x0 = Math.ceil(x0);
+		y0 = Math.ceil(y0);
 		x1 = Math.floor(x1);
 		y1 = Math.floor(y1);
 
-		// console.log(" x0 " + x0 + " y0 " + y0 + " x1 " + x1 + " y1 " + y1);
 		d3.select("#viewport-options").text(" X0 " + x0 + " Y0 " + y0 + " X1 " + x1 + " Y1 " + y1);
+
+		let bounds = [x0, y0, x1, y1];
+		this.parallelBarView.update(bounds);
 	}
 
 	resize() {
