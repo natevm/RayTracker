@@ -92,10 +92,6 @@ struct RayInfo {
 		//TODO: initialize the vector of shadowRays?
 		refractionRay = NULL;
 		reflectionRay = NULL;
-
-		Origin = Point3();
-		Direction = Point3();
-		HitPoint = Point3();
 	}
 
 	int numSecondaryRays() {
@@ -186,7 +182,7 @@ struct RayInfo {
 struct PixelInfo {
 	//Final pixel color
 	//Time taken to render
-	int renderTime; // Now in nanoseconds
+	float renderTime;
 	//Sample count
 	unsigned int sampleCount;
 	//Depth buffer?
@@ -801,179 +797,118 @@ public:
 	bool SaveZImage(const char *filename) const { return SavePNG(filename,zbufferImg,1); }
 	bool SaveSampleCountImage(const char *filename) const { return SavePNG(filename,sampleCountImg,1); }
 
-	bool SavePixInfo(const char *dirname) const {
-		std::string SceneJSON, PixelDataJSON, RayDataJSON;
-
+	bool SavePixInfo(const char *filename) const {
+		//start building a string!
+		std::string json = "{";
 		//Scene TODO
-		//PixelDataJSON += "\"Scene\":{}";
+		json += "\"Scene\":{}";
 			//camera
 			//objects
-		
-		
-		PixelDataJSON = "{";
-		//PixelData
-		PixelDataJSON += "\"PixelData\":{";
-		//dimensions [width,height]
-		PixelDataJSON += "\"dimensions\":["+ std::to_string(width) +","+ std::to_string(height) +"],";
-		//Color [r,g,b, r,g,b, r,g,b,...]
-		PixelDataJSON += "\"Color\":[";
-		unsigned int idx = 0;
 
+		//PixelData
+		json += ",\"PixelData\":{";
+		//dimensions [width,height]
+		json += "\"dimensions\":["+ std::to_string(width) +","+ std::to_string(height) +"],";
+		//Color [r,g,b, r,g,b, r,g,b,...]
+		json += "\"Color\":[";
+		unsigned int idx = 0;
 		for (int y = 0; y < height; y++) {
 			for (int x = 0; x < width; x++) {
 				if (idx != 0)
-					PixelDataJSON += ",";
+					json += ",";
 				//these are 8-bit chars
-				PixelDataJSON += std::to_string(img[idx].r);
-				PixelDataJSON += "," + std::to_string(img[idx].g);
-				PixelDataJSON += "," + std::to_string(img[idx].b);
+				json += std::to_string(img[idx].r);
+				json += "," + std::to_string(img[idx].g);
+				json += "," + std::to_string(img[idx].b);
 				idx++;
 			}
 		}
-		PixelDataJSON += "],";
+		json += "],";
 		//render time
 		idx = 0;
-		PixelDataJSON += "\"Render_time\":[";
-		int minRenderTime = INT32_MAX;
-		int maxRenderTime = 0;
+		json += "\"Render_time\":[";
 		for (int y = 0; y < height; y++) {
 			for (int x = 0; x < width; x++) {
 				if (idx != 0)
-					PixelDataJSON += ",";
-				PixelDataJSON += std::to_string(pixInfo[idx]->renderTime);
-				minRenderTime = min(minRenderTime, pixInfo[idx]->renderTime);
-				maxRenderTime = max(maxRenderTime, pixInfo[idx]->renderTime);
+					json += ",";
+				json += std::to_string(pixInfo[idx]->renderTime);
 				idx++;
 			}
 		}
-		PixelDataJSON += "],";
-
-		//min/max render time
-		PixelDataJSON += "\"min_render_time\":" + std::to_string(minRenderTime) + ",";
-		PixelDataJSON += "\"max_render_time\":" + std::to_string(maxRenderTime) + ",";
-
+		json += "],";
 		//secondary rays
 		idx = 0;
-		PixelDataJSON += "\"Secondary_rays\":[";
-		int minSecondaryRays = INT32_MAX;
-		int maxSecondaryRays = 0;
+		json += "\"Secondary_rays\":[";
 		for (int y = 0; y < height; y++) {
 			for (int x = 0; x < width; x++) {
 				if (idx != 0)
-					PixelDataJSON += ",";
-				PixelDataJSON += std::to_string(pixInfo[idx]->numSecondaryRays);
-				minSecondaryRays = min(minSecondaryRays, pixInfo[idx]->numSecondaryRays);
-				maxSecondaryRays = max(maxSecondaryRays, pixInfo[idx]->numSecondaryRays);
+					json += ",";
+				json += std::to_string(pixInfo[idx]->numSecondaryRays);
 				idx++;
 			}
 		}
-		PixelDataJSON += "],";
-
-		//min/max secondary rays
-		PixelDataJSON += "\"min_secondary_rays\":" + std::to_string(minSecondaryRays) + ",";
-		PixelDataJSON += "\"max_secondary_rays\":" + std::to_string(maxSecondaryRays) + ",";
-
+		json += "],";
 		//sample count
 		idx = 0;
-		PixelDataJSON += "\"Sample_count\":[";
-		int minSampleCount = INT32_MAX;
-		int maxSampleCount = 0;
+		json += "\"Sample_count\":[";
 		for (int y = 0; y < height; y++) {
 			for (int x = 0; x < width; x++) {
 				if (idx != 0)
-					PixelDataJSON += ",";
-				PixelDataJSON += std::to_string(pixInfo[idx]->samples.size());
-				minSampleCount = min(minSampleCount, pixInfo[idx]->samples.size());
-				maxSampleCount = max(maxSampleCount, pixInfo[idx]->samples.size());
+					json += ",";
+				json += std::to_string(pixInfo[idx]->samples.size());
 				idx++;
 			}
 		}
-		PixelDataJSON += "],";
-
-		//min/max sample count
-		PixelDataJSON += "\"min_sample_count\":" + std::to_string(minSampleCount) + ",";
-		PixelDataJSON += "\"max_sample_count\":" + std::to_string(maxSampleCount) + ",";
-
+		json += "],";
 		//depth buffer
 		idx = 0;
-		PixelDataJSON += "\"Depth_buffer\":[";
-		float minDepth = BIGFLOAT;
-		float maxDepth = 0;
+		json += "\"Depth_buffer\":[";
 		for (int y = 0; y < height; y++) {
 			for (int x = 0; x < width; x++) {
 				if (idx != 0)
-					PixelDataJSON += ",";
-				PixelDataJSON += std::to_string(zbuffer[idx]);
-				minDepth = min(minDepth, zbuffer[idx]);
-				maxDepth = max(maxDepth, zbuffer[idx]);
+					json += ",";
+				json += std::to_string(zbuffer[idx]);
 				idx++;
 			}
 		}
-		PixelDataJSON += "],";
-
-		//min/max depth
-		PixelDataJSON += "\"min_depth\":" + std::to_string(minDepth) + ",";
-		PixelDataJSON += "\"max_depth\":" + std::to_string(maxDepth) + ",";
-
+		json += "],";
 		//variance
 		idx = 0;
-		PixelDataJSON += "\"Variance\":[";
-		float minVariance = BIGFLOAT;
-		float maxVariance = 0;
+		json += "\"Variance\":[";
 		for (int y = 0; y < height; y++) {
 			for (int x = 0; x < width; x++) {
 				if (idx != 0)
-					PixelDataJSON += ",";
-				PixelDataJSON += std::to_string(pixInfo[idx]->sampleVariance);
-				minVariance = min(minVariance, pixInfo[idx]->sampleVariance);
-				maxVariance = max(maxVariance, pixInfo[idx]->sampleVariance);
+					json += ",";
+				json += std::to_string(pixInfo[idx]->sampleVariance);
 				idx++;
 			}
 		}
-		PixelDataJSON += "],";
+		json += "]";
 
-		PixelDataJSON += "\"min_variance\":" + std::to_string(minVariance) + ",";
-		PixelDataJSON += "\"max_variance\":" + std::to_string(maxVariance);
+		json += "}";
 
-		PixelDataJSON += "}";
-		PixelDataJSON += "}";
-
-		std::ofstream out(dirname + std::string("pixeldata.json"));
-		out << PixelDataJSON;
-		out.close();
-
-		////RayData
+		//RayData
+		json += ",\"RayData\":[";
 		int numPixels = width * height;
-		int pixelsPerFile = 128;
-		int numFiles = numPixels / pixelsPerFile;
-
-		/* ASSUMING SCREEN SIZE IS DIVISABLE BY 64! */
-		for (int fileidx = 0; fileidx < numFiles; fileidx++) {
-			RayDataJSON = "{";
-			RayDataJSON += "\"RayData\":[";
-			
-			//for each pixel
-			for (int i = fileidx * pixelsPerFile; i < (fileidx * pixelsPerFile) + pixelsPerFile; i++) {
-				int numSamples = pixInfo[i]->samples.size();
-				if (i != 0)RayDataJSON += ",";
-				RayDataJSON += "[";
-				//for each sample
-				for (int s = 0; s < numSamples; s++) {
-					RayDataJSON += pixInfo[i]->samples[s]->toJSON();
-					if (s != numSamples - 1) RayDataJSON += ",";
-				}
-				RayDataJSON += "]";
+		//for each pixel
+		for (int i = 0; i < numPixels; i++) {
+			int numSamples = pixInfo[i]->samples.size();
+			if (i != 0)json += ",";
+			json += "[";
+			//for each sample
+			for (int s = 0; s < numSamples; s++) {
+				json += pixInfo[i]->samples[s]->toJSON();
 			}
-
-			RayDataJSON += "]";
-			RayDataJSON += "}";
-			std::ofstream out2(dirname + std::string("raydata" + std::to_string(fileidx) + ".json"));
-			out2 << RayDataJSON;
-			out2.close();
-
+			json += "]";
 		}
 
+		json += "]";
 
+		json += "}";
+
+		std::ofstream out(filename);
+		out << json;
+		out.close();
 		return true;
 	};
 

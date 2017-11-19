@@ -9,8 +9,8 @@ using namespace std;
 #endif
 
 //ADAPTIVE ANTIALIASING
-#define MIN_SAMPLES 4
-#define MAX_SAMPLES 8
+#define MIN_SAMPLES 1
+#define MAX_SAMPLES 4
 #define VARIANCE_THRESHOLD 0.001f
 
 #define MAX_BOUNCES 4
@@ -31,7 +31,6 @@ using namespace std;
 
 #include "PixelIterator.h"
 #include "src/lights.h"
-#include <chrono>
 //#include <atomic>	//std::atomic
 
 Node rootNode;
@@ -97,7 +96,7 @@ void BeginRender() {
 	Render();
 	//stop a timer
 	const clock_t end_time = clock();
-	float duration = float(end_time - begin_time) / (float)CLOCKS_PER_SEC;
+	float duration = float(end_time - begin_time) / CLOCKS_PER_SEC;
 	printf("Render time: %f\n", duration);
 
 	//printf("Max: %u\n", maxNum);
@@ -119,7 +118,7 @@ void BeginRender() {
 
 	//TODO: save ray info to a JSON file
 	//TODO: save numIntersectionTests maps to a JSON file. (Or a PNG?)
-	renderImage.SavePixInfo("");
+	renderImage.SavePixInfo("ray_info.json");
 
 }
 
@@ -1271,7 +1270,6 @@ void RenderPixels(PixelIterator &it, int rID) {
 
 				//start the clock on this pixel
 				const clock_t pixStart = clock();
-				auto start = std::chrono::high_resolution_clock::now();
 
 				//adaptive antialiasing
 				//keep track of the number of samples so far, numSamples
@@ -1389,11 +1387,8 @@ void RenderPixels(PixelIterator &it, int rID) {
 
 				//end the clock on this pixel
 				const clock_t pixEnd = clock();
-				auto finish = std::chrono::high_resolution_clock::now();
-				//std::cout << std::chrono::duration_cast<std::chrono::nanoseconds>(finish - start).count() << "ns\n";
-
 				//record the time taken for this pixel
-				pInfo->renderTime = std::chrono::duration_cast<std::chrono::nanoseconds>(finish - start).count();// (pixEnd - pixStart) / (float)CLOCKS_PER_SEC;
+				pInfo->renderTime = pixEnd - pixStart;
 				//store it in the map
 				pixInfos[pixIdx] = pInfo;
 

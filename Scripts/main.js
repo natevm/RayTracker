@@ -20,19 +20,21 @@ document.addEventListener("DOMContentLoaded", function(event) {
 		console.log(error);
 		console.log(data);
 		ParallelBarView.setData(data.PixelData);
+
+		UpdateAll();
 	});
 
-	d3.json("./Data/64/raydata.json", function(error, data){
-		console.log(error);
-		console.log(data);
-		RayTreeView.setData(data.RayData);
-		RayTreeView.update();
-	});
+	// d3.json("./Data/64/raydata/.json", function(error, data){
+	// 	console.log(error);
+	// 	console.log(data);
+	// 	RayTreeView.setData(data.RayData);
+	// 	RayTreeView.update();
+	// });
 
 });
 
 window.onresize = function(event) {
+	ParallelBarView.resize();
     ImageView.resize();
 	RayTreeView.resize();
-	ParallelBarView.resize();
 };

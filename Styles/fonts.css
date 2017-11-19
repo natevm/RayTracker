@@ -19,3 +19,15 @@ body, input, select, textarea {
     font-weight: 100;
     line-height: 1.75em;
 }
+
+@media screen and (orientation:portrait) {
+	.label {
+		font-size: 3vw;
+	}
+}
+
+@media screen and (orientation:landscape) { 
+	.label {
+		font-size: 1.5vw
+	}
+}

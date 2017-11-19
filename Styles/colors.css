@@ -1,6 +1,10 @@
 :root {
 	--main-bg-color: #1c1d26;
 	--transparent-color1: rgba(39, 40, 51, 0.965);
+	--transparent-color2: rgba(39, 40, 51, 1.0);
+	--transparent: rgba(0,0,0,0);
+	--transparent1: rgba(0,0,0,.1);
+	--transparent2: rgba(0,0,0,.2);
 }
 
 body {
@@ -13,4 +17,46 @@ body {
 	background-color: var(--transparent-color1);
 	/*box-shadow: 0 0 0.25em 0 rgba(0, 0, 0, 0.25);*/
 	margin: 1px;
+}
+
+
+.button {
+    fill: var(--transparent-color1);
+}
+
+.button-overlay {
+    fill: var(--transparent);
+	pointer-events: all;
+        -webkit-transition-duration: 0.4s; /* Safari */
+    transition-duration: 0.4s;
+}
+
+.button-overlay:hover{
+	fill:var(--transparent1);
+	cursor:pointer;
+}
+
+.button-overlay:active{
+	fill:var(--transparent2);
+}
+
+.label {
+	-webkit-user-select: none; /* Safari */        
+	-moz-user-select: none; /* Firefox */
+	-ms-user-select: none; /* IE10+/Edge */
+	user-select: none; /* Standard */
+
+	fill: white;
+}
+
+.row-overlay {
+	fill:var(--transparent);
+}
+
+.row-overlay.hover {
+	fill:var(--transparent1);
+}
+
+.row-overlay.active {
+	fill:var(--transparent2);
 }

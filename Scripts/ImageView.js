@@ -5,7 +5,9 @@
 */
 class ImageView {
 	constructor(parallelBarView) {
+		d3.select("#viewport").html("");
 		this.parallelBarView = parallelBarView;
+		this.parallelBarView.setImageView(this);
 		this.viewportDiv = d3.select("#viewport");
 		this.svg = this.viewportDiv.append("svg");
 		this.width = $("#viewport").width();
@@ -13,6 +15,7 @@ class ImageView {
     	this.imgWidth = 64; 
     	this.imgHeight = 64; 
 		this.svg.attr("width", this.width).attr("height", this.height);
+		this.lastTransform = {"k":1,"x":0,"y":0};
 	};
 
 	update() {
@@ -38,11 +41,16 @@ class ImageView {
 		let group = svg.append("g")
 				.attr("transform", "translate(" + translate0 +")scale(" + scale0 + ")");
 
-		svg.call(d3.zoom().scaleExtent([1,10]).on("zoom", () => {
+		svg.call(d3.zoom().scaleExtent([.5,10]).on("zoom", () => {
 				group.attr("transform", d3.event.transform)
 				self.brush(d3.event.transform);
+				this.lastTransform = d3.event.transform;
 			}
 		));
+
+		/* Call brush once for the default transform. */
+		group.attr("transform", "translate(" + this.lastTransform.x + "," + this.lastTransform.y + ") scale(" + this.lastTransform.k+")");
+		this.brush(this.lastTransform);
 
 		this.image = group.append("image");
 		this.image.attr("xlink:href", "./Data/64/render.png");
@@ -72,7 +80,11 @@ class ImageView {
 		d3.select("#viewport-options").text(" X0 " + x0 + " Y0 " + y0 + " X1 " + x1 + " Y1 " + y1);
 
 		let bounds = [x0, y0, x1, y1];
-		this.parallelBarView.update(bounds);
+		this.parallelBarView.updateBounds(bounds);
+	}
+
+	selectPixel(x, y) {
+		console.log("TODO: select pixel " + x + " " + y + " in the image view. ");
 	}
 
 	resize() {
