@@ -12,7 +12,7 @@
 		flex-basis: 50px;
 	}
 
-	#viewport-column {
+	#image-column {
 		/*flex-basis: 50%;*/
 		width: 100vmin;
 		height: 110vmin;
@@ -31,24 +31,24 @@
 		align-items: center;
 		justify-content: center;
 		margin: 0px;
-		/*width: 100%;*/
-		/*height: 100%;*/
 	}
 
 	#sidebar{
-		width: 10vw;
+		width: 13vw;
 		height: 40vw;
+		padding-right: 2vw;
 	}
 
-	#viewport-column {
+	#image-column {
 		/*flex-basis: 50%;*/
-		width: 40vw;
+		width: 38vw;
 		height: 45vw;
+		padding-right: 2vw;
 	}
 
 	#pixel-analysis-column{
 		/*flex-basis: 50%;*/
-		width: 40vw;
+		width: 38vw;
 		height: 45vw;
 	}
 }
@@ -84,31 +84,31 @@
 		align-items: center;
 	}
 }
-
 @media screen and (orientation:landscape) {
 	#sidebar {
 		display: flex;
 		flex-direction: column;
 		height: 45vw;
+		width: 5vw;
 		/*justify-content: space-evenly;*/
 	}
 
 	#help-toggle {
-		flex-basis: 5vw;
+		flex-basis: 10vw;
 
 		display: flex;
 		justify-content: center;
 		align-items: center;
 	}
 	#pixel-view-toggle{
-		flex-basis: 20vw;
+		flex-basis: 17.5vw;
 
 		display: flex;
 		justify-content: center;
 		align-items: center;
 	}
 	#three-d-view-toggle{
-		flex-basis: 20vw;
+		flex-basis: 17.5vw;
 
 		display: flex;	
 		justify-content: center;
@@ -118,18 +118,18 @@
 
 /* 3D viewport items */
 @media screen and (orientation:portrait) {
-	#viewport-column {
+	#image-column {
 		display: flex;
 		flex-direction: column;
 	}
-	#viewport-options {
+	#image-menu {
 		flex-basis: 10vw;
 
 		display: flex;
 		justify-content: center;
 		align-items: center;
 	}
-	#viewport {
+	#image-viewport {
 	
 		width: 100vw;
 		height: 100vw;
@@ -139,23 +139,20 @@
 		align-items: center;
 	}
 }
-
 @media screen and (orientation:landscape) {
-	#viewport-column {
+	#image-column {
 		display: flex;
 		flex-direction: column;
 	}
-	#viewport-options {
-		flex-basis: 5vw;
+	#image-menu {
+		flex-basis: 7vw;
 
 		display: flex;
 		justify-content: center;
 		align-items: center;
 	}
-	#viewport {
-		width: 40vw;
-		height: 40vw;
-		/*height: 100%;*/
+	#image-viewport {
+		height: 38vw;
 		
 		display: flex;
 		justify-content: center;
@@ -169,55 +166,37 @@
 		display: flex;
 		flex-direction: column;
 	}
-	#pixel-analysis-options {
+	#pixel-analysis-menu {
 		flex-basis: 10vw;
 
 		display: flex;
 		justify-content: center;
 		align-items: center;
 	}
-	#bar-chart {
+	#pixel-analysis-viewport {
 		width: 100vw;
-		height: 50vw;
-		
-		display: flex;
-		justify-content: center;
-		align-items: center;
-	}
-	#tree-view {
-		width: 100vw;
-		height: 50vw;
+		height: 100vw;
 		
 		display: flex;
 		justify-content: center;
 		align-items: center;
 	}
 }
-
 @media screen and (orientation:landscape) {
 	#pixel-analysis-column {
 		display: flex;
 		flex-direction: column;
 	}
-	#pixel-analysis-options {
-		flex-basis: 5vw;
+	#pixel-analysis-menu {
+		flex-basis: 7vw;
 
 		display: flex;
 		justify-content: center;
 		align-items: center;
 	}
-	#bar-chart {
-		width: 40vw;
-		height: 20vw;
+	#pixel-analysis-viewport {
+		height: 38vw;
 		/*height: 100%;*/
-		
-		display: flex;
-		justify-content: center;
-		align-items: center;
-	}
-	#tree-view {
-		width: 40vw;
-		height: 20vw;
 		
 		display: flex;
 		justify-content: center;

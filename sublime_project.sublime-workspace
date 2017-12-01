@@ -369,7 +369,7 @@
 	},
 	"select_project":
 	{
-		"height": 500.0,
+		"height": 625.0,
 		"last_filter": "",
 		"selected_items":
 		[
@@ -378,7 +378,7 @@
 				"C:\\git\\UofU\\CS6620\\cs6620_subl_workspace.sublime-workspace"
 			]
 		],
-		"width": 380.0
+		"width": 475.0
 	},
 	"select_symbol":
 	{

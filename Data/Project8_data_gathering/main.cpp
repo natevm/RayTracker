@@ -1,6 +1,7 @@
 #include <stdio.h>	//printf
 #include <ctime>	//clock, clock_t
 #include <thread>	//thread
+#include "src/timer.h"
 
 using namespace std;
 
@@ -9,11 +10,11 @@ using namespace std;
 #endif
 
 //ADAPTIVE ANTIALIASING
-#define MIN_SAMPLES 1
-#define MAX_SAMPLES 4
+#define MIN_SAMPLES 4
+#define MAX_SAMPLES 16
 #define VARIANCE_THRESHOLD 0.001f
 
-#define MAX_BOUNCES 4
+#define MAX_BOUNCES 6
 
 //RAY DIFFERENTIALS
 //comment this out if you don't want ray differentials
@@ -31,6 +32,7 @@ using namespace std;
 
 #include "PixelIterator.h"
 #include "src/lights.h"
+#include <chrono>
 //#include <atomic>	//std::atomic
 
 Node rootNode;
@@ -96,7 +98,7 @@ void BeginRender() {
 	Render();
 	//stop a timer
 	const clock_t end_time = clock();
-	float duration = float(end_time - begin_time) / CLOCKS_PER_SEC;
+	float duration = float(end_time - begin_time) / (float)CLOCKS_PER_SEC;
 	printf("Render time: %f\n", duration);
 
 	//printf("Max: %u\n", maxNum);
@@ -118,7 +120,7 @@ void BeginRender() {
 
 	//TODO: save ray info to a JSON file
 	//TODO: save numIntersectionTests maps to a JSON file. (Or a PNG?)
-	renderImage.SavePixInfo("ray_info.json");
+	renderImage.SavePixInfo("");
 
 }
 
@@ -1208,6 +1210,8 @@ bool Trace(Ray _r, HitInfo &_hit, RayInfo *_rInfo) {
 
 }
 
+#include <time.h>
+
 void RenderPixels(PixelIterator &it, int rID) {
 	//Grab pointers to the pixel array and the zbuffer array, img and zbuff
 	Color24 *img = renderImage.GetPixels();
@@ -1252,161 +1256,182 @@ void RenderPixels(PixelIterator &it, int rID) {
 
 				pixIdx = i_y * imgWidth + i_x;
 
-				//476 395
-				/*if (i_x == 476 && i_y == 395) {
-				int one = 2;
-				}*/
+				double minTime = BIGFLOAT;
+				for (int i = 0; i < 4; ++i) {
 
-				//16 16
-				/*if (i_x == 16 && i_y == 16) {
+					//476 395
+					/*if (i_x == 476 && i_y == 395) {
 					int one = 2;
-				}*/
-				if (pixIdx == 3) {
-					int one = 2;
-				}
+					}*/
 
-				//create a pixelInfo for this pixel
-				PixelInfo *pInfo = new PixelInfo();
+					//16 16
+					/*if (i_x == 16 && i_y == 16) {
+						int one = 2;
+					}*/
+					if (pixIdx == 3) {
+						int one = 2;
+					}
 
-				//start the clock on this pixel
-				const clock_t pixStart = clock();
+					//create a pixelInfo for this pixel
+					PixelInfo *pInfo = new PixelInfo();
 
-				//adaptive antialiasing
-				//keep track of the number of samples so far, numSamples
-				unsigned int numSamples = 0;
-				//keep track of the sample variance for this pixel, pixVariance
-				float pixVariance = 0.f;
-				cy::Color pixColor = cy::Color();
-				pixColor.SetBlack();
-				cy::Color subPixColor = cy::Color();
-				subPixColor.SetBlack();
+					LARGE_INTEGER t1, t2, freq;
 
-				float sampleTotal = 0.f;		//the total accumulated sample value (for finding the mean)
-				float sampleSquaredTotal = 0.f;	//the total accumulated square sample value
+					QueryPerformanceCounter(&t1);
 
-				//while numSamples < MIN_SAMPLES OR (numSamples < MAX_SAMPLES AND pixVariance > VARIANCE_THRESHOLD)
-				while(numSamples < MIN_SAMPLES || (numSamples < MAX_SAMPLES && pixVariance > VARIANCE_THRESHOLD)){
-					//use the Halton Sequence to generate a pixel sample location
-					float haltonX = Halton(numSamples, 2);
-					float haltonY = Halton(numSamples, 3);	//TODO: offset these by a random amount per pixel, make sure to wrap around
-					
-					//trace a camera ray and get the color, add it to pixColor
-					//create a camera ray
-					Point3 q = A + ((float)(i_x)+haltonX) * u + ((float)(i_y)+haltonY) * v;
+
+
+					//start the clock on this pixel
+					//const clock_t pixStart = clock();
+				//	double start = getCPUTime();//std::chrono::high_resolution_clock::now();
+
+					//adaptive antialiasing
+					//keep track of the number of samples so far, numSamples
+					unsigned int numSamples = 0;
+					//keep track of the sample variance for this pixel, pixVariance
+					float pixVariance = 0.f;
+					cy::Color pixColor = cy::Color();
+					pixColor.SetBlack();
+					cy::Color subPixColor = cy::Color();
+					subPixColor.SetBlack();
+
+					float sampleTotal = 0.f;		//the total accumulated sample value (for finding the mean)
+					float sampleSquaredTotal = 0.f;	//the total accumulated square sample value
+
+					//while numSamples < MIN_SAMPLES OR (numSamples < MAX_SAMPLES AND pixVariance > VARIANCE_THRESHOLD)
+					while (numSamples < MIN_SAMPLES || (numSamples < MAX_SAMPLES && pixVariance > VARIANCE_THRESHOLD)) {
+						//use the Halton Sequence to generate a pixel sample location
+						float haltonX = Halton(numSamples, 2);
+						float haltonY = Halton(numSamples, 3);	//TODO: offset these by a random amount per pixel, make sure to wrap around
+
+						//trace a camera ray and get the color, add it to pixColor
+						//create a camera ray
+						Point3 q = A + ((float)(i_x)+haltonX) * u + ((float)(i_y)+haltonY) * v;
 
 #ifdef RAY_DIFFERENTIALS
-					//TODO: HOW DO WE DO THIS WITH MULTISAMPLING???
-					//calculate differential ray directions
-					/*Point3 q_u = A + ((float)(i_x)+1.0f) * u + ((float)(i_y)+0.5f) * v;
-					Point3 q_v = A + ((float)(i_x)+0.5f) * u + ((float)(i_y)+1.0f) * v;*/
-					Point3 q_u = A + ((float)(i_x)+haltonX+0.5f) * u + ((float)(i_y)+haltonY) * v;
-					Point3 q_v = A + ((float)(i_x)+haltonX) * u + ((float)(i_y)+haltonY+0.5f) * v;
+						//TODO: HOW DO WE DO THIS WITH MULTISAMPLING???
+						//calculate differential ray directions
+						/*Point3 q_u = A + ((float)(i_x)+1.0f) * u + ((float)(i_y)+0.5f) * v;
+						Point3 q_v = A + ((float)(i_x)+0.5f) * u + ((float)(i_y)+1.0f) * v;*/
+						Point3 q_u = A + ((float)(i_x)+haltonX + 0.5f) * u + ((float)(i_y)+haltonY) * v;
+						Point3 q_v = A + ((float)(i_x)+haltonX) * u + ((float)(i_y)+haltonY + 0.5f) * v;
 
-					Ray qRay = Ray(camera.pos, q - camera.pos, camera.pos, q_u - camera.pos, camera.pos, q_v - camera.pos);
+						Ray qRay = Ray(camera.pos, q - camera.pos, camera.pos, q_u - camera.pos, camera.pos, q_v - camera.pos);
 #else
-					Ray qRay = Ray(camera.pos, q - camera.pos);
+						Ray qRay = Ray(camera.pos, q - camera.pos);
 #endif
 
-					qRay.Normalize();
+						qRay.Normalize();
 
-					//create a rayInfo to pass through
-					RayInfo *sampleRayInfo = new RayInfo();
-					sampleRayInfo->Origin = qRay.p;
-					sampleRayInfo->Direction = qRay.dir;
-					sampleRayInfo->rayType = 0;	//for camera
-					
-					
-					/*qRay.rInfo.Init();
-					qRay.rInfo.Origin = qRay.p;
-					qRay.rInfo.Direction = qRay.dir;
-					qRay.rInfo.rayType = 0;	//for camera*/
+						//create a rayInfo to pass through
+						RayInfo *sampleRayInfo = new RayInfo();
+						sampleRayInfo->Origin = qRay.p;
+						sampleRayInfo->Direction = qRay.dir;
+						sampleRayInfo->rayType = 0;	//for camera
 
-					//create a hitInfo object
-					HitInfo	qHit = HitInfo();
 
-					//trace the ray
-					Trace(qRay, qHit, sampleRayInfo);
-					//if it hit something
-					if (qHit.node != NULL) {
+						/*qRay.rInfo.Init();
+						qRay.rInfo.Origin = qRay.p;
+						qRay.rInfo.Direction = qRay.dir;
+						qRay.rInfo.rayType = 0;	//for camera*/
 
-						//TODO: store object index
-						sampleRayInfo->HitPoint = qHit.p;
+						//create a hitInfo object
+						HitInfo	qHit = HitInfo();
 
-						//shade the pixel
-						const Material* pixMat = qHit.node->GetMaterial();
-						subPixColor = pixMat->Shade(qRay, qHit, lights, MAX_BOUNCES, sampleRayInfo);
-						//for BVH profiling, map the intersection test counts to colors
-						//maxNum = max(maxNum, numBoxTests + numIntersectionTests);
+						//trace the ray
+						Trace(qRay, qHit, sampleRayInfo);
+						//if it hit something
+						if (qHit.node != NULL) {
 
+							//TODO: store object index
+							sampleRayInfo->HitPoint = qHit.p;
+
+							//shade the pixel
+							const Material* pixMat = qHit.node->GetMaterial();
+							subPixColor = pixMat->Shade(qRay, qHit, lights, MAX_BOUNCES, sampleRayInfo);
+							//for BVH profiling, map the intersection test counts to colors
+							//maxNum = max(maxNum, numBoxTests + numIntersectionTests);
+
+
+							sampleRayInfo->colorContribution = subPixColor;
+
+						}
+						else {
+							//set the pixel color to the background image color
+							Point3 texSpace = Point3(float(i_b_x + dx + haltonX) / float(imgWidth), float(i_b_y + dy + haltonY) / float(imgHeight), 0.f);
+
+							subPixColor = background.Sample(texSpace);
+						}
+						zbuff[pixIdx] = qHit.z;
+
+						pixColor += subPixColor;
 
 						sampleRayInfo->colorContribution = subPixColor;
 
+
+						//increment numSamples
+						numSamples++;
+
+						//combine the color values into one value, sample
+						float subPixSample = subPixColor.Sum() / 3.f;
+						sampleTotal += subPixSample;
+						sampleSquaredTotal += subPixSample * subPixSample;
+						//calculate the sample variance of this pixel, pixVariance
+						//get the average of the squared samples
+						float A = sampleSquaredTotal / float(numSamples);
+						//get the average of the samples
+						float C_bar = sampleTotal / float(numSamples);
+						//get ((2 * average of the samples) / numSamples) * the sum of the samples, B
+						float B = ((2.f * C_bar) / float(numSamples)) * sampleTotal;
+						//combine them: A + C_bar^2 - B
+						pixVariance = A + (C_bar * C_bar) - B;
+
+						//store this pixel variance on the pixelInfo
+						pInfo->sampleVariance = pixVariance;
+
+						//store the number of secondary rays
+						pInfo->numSecondaryRays += sampleRayInfo->numSecondaryRays();
+
+						//push the sample info onto the PixelInfo's vector of samples
+						pInfo->samples.push_back(sampleRayInfo);
 					}
-					else {
-						//set the pixel color to the background image color
-						Point3 texSpace = Point3(float(i_b_x + dx + haltonX) / float(imgWidth), float(i_b_y + dy + haltonY) / float(imgHeight), 0.f);
 
-						subPixColor = background.Sample(texSpace);
+					//divide the accumulated pixel color by the number of samples
+					pixColor = pixColor / float(numSamples);
+
+					//end the clock on this pixel
+					double finish = getCPUTime();//std::chrono::high_resolution_clock::now();
+					//std::cout << std::chrono::duration_cast<std::chrono::nanoseconds>(finish - start).count() << "ns\n";
+
+					QueryPerformanceCounter(&t2);
+					QueryPerformanceFrequency(&freq);
+
+					//record the time taken for this pixel
+					minTime = min(minTime, (double)(t2.QuadPart - t1.QuadPart) / (double)freq.QuadPart);//finish - start;// (pixEnd - pixStart) / (float)CLOCKS_PER_SEC;
+					//store it in the map
+					pixInfos[pixIdx] = pInfo;
+
+					//store the pixel color
+					img[pixIdx].r = (unsigned char)(pixColor.r * 255.f);
+					img[pixIdx].g = (unsigned char)(pixColor.g * 255.f);
+					img[pixIdx].b = (unsigned char)(pixColor.b * 255.f);
+
+					//record the number of samples in its map
+					sampCount[pixIdx] = numSamples;
+
+					//numRendered++;
+					//if the user kills the render early
+					if (rID != RenderID) {
+						return;
 					}
-					zbuff[pixIdx] = qHit.z;
-
-					pixColor += subPixColor;
-
-					sampleRayInfo->colorContribution = subPixColor;
-
-
-					//increment numSamples
-					numSamples++;
-					
-					//combine the color values into one value, sample
-					float subPixSample = subPixColor.Sum() / 3.f;
-					sampleTotal += subPixSample;
-					sampleSquaredTotal += subPixSample * subPixSample;
-					//calculate the sample variance of this pixel, pixVariance
-					//get the average of the squared samples
-					float A = sampleSquaredTotal / float(numSamples);
-					//get the average of the samples
-					float C_bar = sampleTotal / float(numSamples);
-					//get ((2 * average of the samples) / numSamples) * the sum of the samples, B
-					float B = ((2.f * C_bar) / float(numSamples)) * sampleTotal;
-					//combine them: A + C_bar^2 - B
-					pixVariance = A + (C_bar * C_bar) - B;
-
-					//store this pixel variance on the pixelInfo
-					pInfo->sampleVariance = pixVariance;
-
-					//store the number of secondary rays
-					pInfo->numSecondaryRays += sampleRayInfo->numSecondaryRays();
-
-					//push the sample info onto the PixelInfo's vector of samples
-					pInfo->samples.push_back(sampleRayInfo);
 				}
-				
-				//divide the accumulated pixel color by the number of samples
-				pixColor = pixColor / float(numSamples);
+				pixInfos[pixIdx]->renderTime = minTime;
 
-				//end the clock on this pixel
-				const clock_t pixEnd = clock();
-				//record the time taken for this pixel
-				pInfo->renderTime = pixEnd - pixStart;
-				//store it in the map
-				pixInfos[pixIdx] = pInfo;
-
-				//store the pixel color
-				img[pixIdx].r = (unsigned char)(pixColor.r * 255.f);
-				img[pixIdx].g = (unsigned char)(pixColor.g * 255.f);
-				img[pixIdx].b = (unsigned char)(pixColor.b * 255.f);
-
-				//record the number of samples in its map
-				sampCount[pixIdx] = numSamples;
-
-				//numRendered++;
-				//if the user kills the render early
-				if (rID != RenderID) {
-					return;
-				}
 			}
 		}
+		
+
+
 	}
 	//printf("%d\n", numRendered);
 }

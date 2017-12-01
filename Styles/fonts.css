@@ -20,6 +20,22 @@ body, input, select, textarea {
     line-height: 1.75em;
 }
 
+.h {
+	fill: rgba(255, 255, 255, 0.75);
+	font-family: "Roboto", Helvetica, sans-serif;
+
+	font-size: 1.5vw;
+    font-weight: 100;
+}
+
+.p {
+	fill: rgba(255, 255, 255, 0.75);
+	font-family: "Roboto", Helvetica, sans-serif;
+
+	font-size: 1vw;
+    font-weight: 100;
+}
+
 @media screen and (orientation:portrait) {
 	.label {
 		font-size: 3vw;
@@ -28,6 +44,25 @@ body, input, select, textarea {
 
 @media screen and (orientation:landscape) { 
 	.label {
-		font-size: 1.5vw
+		font-size: 1.0vw
 	}
+}
+
+.rotate {
+
+/* Safari */
+-webkit-transform: rotate(-90deg);
+
+/* Firefox */
+-moz-transform: rotate(-90deg);
+
+/* IE */
+-ms-transform: rotate(-90deg);
+
+/* Opera */
+-o-transform: rotate(-90deg);
+
+/* Internet Explorer */
+filter: progid:DXImageTransform.Microsoft.BasicImage(rotation=3);
+
 }

@@ -53,7 +53,6 @@ file(
     "${SRC_PATH}/*.vert*"
 )
 
-
 # Definitions 
 add_definitions(-DSCENE_PATH="${CMAKE_SOURCE_DIR}/../Scenes/")
 add_definitions(-DMODEL_PATH="${CMAKE_SOURCE_DIR}/../Models/")

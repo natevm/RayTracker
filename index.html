@@ -3,28 +3,44 @@
 		<title>This is title</title>
 		<link rel="stylesheet" href="./Styles/flexbox.css">
 		<link rel="stylesheet" href="./Styles/viewport.css">
-		<link rel="stylesheet" href="./Styles/colors.css">
 		<link rel="stylesheet" href="./Styles/fonts.css">
+		<link rel="stylesheet" href="./Styles/colors.css">
 		<meta name="viewport" content="width=device-width,initial-scale=1.0">
 	</header>
 	<body id="main-container">
 		<div id="sidebar">
-			<div id="help-toggle">?</div>
-			<div id="pixel-view-toggle">
-				Image View
+			<div id="help-toggle">
+				<p class="unselectable">
+				?
+				</p>
 			</div>
-			<div id="three-d-view-toggle">3D View</div>
+			<div id="pixel-view-toggle">
+				<p class="rotate unselectable"> 
+					Story Mode
+				</p>
+			</div>
+			<div id="three-d-view-toggle">
+				<p class="rotate unselectable">
+					Explore mode
+				</p>
+			</div>
 		</div>
-		<div id="viewport-column">
-			<div id="viewport-options">Viewport options</div>
-			<div id="viewport">
+		<!-- was viewport-column -->
+		<div id="image-column">
+			<!-- was viewport-options -->
+			<div id="image-menu">Image menu</div>
+			<!-- was viewport -->
+			<div id="image-viewport">
+				Image viewport
 			</div>
 		</div>
 		<div id="pixel-analysis-column">
-			<div id="pixel-analysis-options">Pixel analysis options</div>
-			<div id="bar-chart">
+			<div id="pixel-analysis-menu">Pixel analysis menu</div>
+			<!-- was bar-chart -->
+			<div id="pixel-analysis-viewport">
+				Pixel analysis viewport
 			</div>
-			<div id="tree-view"></div>
+			<!-- <div id="tree-view"></div> -->
 		</div>
 	</body>
 </html>

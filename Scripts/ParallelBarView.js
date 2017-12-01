@@ -5,108 +5,124 @@
 */
 class ParallelBarView {
 	constructor() {
-		d3.select("#bar-chart").html("");
-		this.barchartDiv = d3.select("#bar-chart");
+		/* Create viewport */		
+		d3.select("#pixel-analysis-viewport").html("");
+		this.barchartDiv = d3.select("#pixel-analysis-viewport");
 		this.svg = this.barchartDiv.append("svg");
-		this.width = $("#bar-chart").width();
-    	this.height = $("#bar-chart").height();
+		this.width = $("#pixel-analysis-viewport").width();
+    	this.height = $("#pixel-analysis-viewport").height();
+    	this.barGroupHeight = this.height * .9;
+    	this.barGroupWidth = this.width;
+    	this.buttonMenuHeight = this.height - this.barGroupHeight;
+    	this.buttonMenuWidth = this.width;
 		this.svg.attr("width", this.width).attr("height", this.height);
-		this.totalBars = 6; // Currently only 6 characteristics
-
-		d3.select("#pixel-analysis-options").html("");
-		this.optionsDiv = d3.select("#pixel-analysis-options");
-		this.optionsSvg =  this.optionsDiv.append("svg");
-		this.optionsWidth = $("#pixel-analysis-options").width();
-    	this.optionsHeight = $("#pixel-analysis-options").height();
-		this.optionsSvg.attr("width", this.optionsWidth)
-						.attr("height", this.optionsHeight);
-
-		this.createButtons();
-		this.createGroups();
-
+		this.totalBars = 8; // Currently only 6 characteristics
+		this.lastSort = "time";
 		this.colorAsc = false;
 		this.timeAsc = false;
 		this.branchesAsc = false;
 		this.samplesAsc = false;
 		this.depthAsc = false;
 		this.varianceAsc = false;
+		this.boxIntersectionsAsc = false;
+		this.objIntersectionsAsc = false;
+
+		/* Create menu */
+		d3.select("#pixel-analysis-menu").html("");
+		this.menuDiv = d3.select("#pixel-analysis-menu");
+		this.menuSVG =  this.menuDiv.append("svg");
+		this.menuWidth = $("#pixel-analysis-menu").width();
+    	this.menuHeight = $("#pixel-analysis-menu").height();
+		this.menuSVG.attr("width", this.menuWidth)
+						.attr("height", this.menuHeight);
+
+		this.checkpoint = 0;
+		this.maxCheckpoint = 1;
+
+		this.createGroups();
 	};
 
-	/* Creates all buttons */
-	createButtons() {
-		this.optionsSvg.selectAll("g").remove();
-		let group = this.optionsSvg.append("g");
-
-		/* Color button */
-		let colorButton = this.createButton(group, 0, "Color");
-		colorButton.on("click", () => {this.sortColor()});
-
-		/* Time button */
-		let timeButton = this.createButton(group, 1, "Time");
-		timeButton.on("click", () => {this.sort("time")});
-
-		/* Branches button */
-		let branchesButton = this.createButton(group, 2, "Branches");
-		branchesButton.on("click", () => {this.sort("branches")});
-		
-		/* Samples button */
-		let samplesButton = this.createButton(group, 3, "Samples");
-		samplesButton.on("click", () => {this.sort("samples")});
-		
-		/* Depth button */
-		let depthButton = this.createButton(group, 4, "Depth");
-		depthButton.on("click", () => {this.sort("depth")});
-		
-		/* Variance button */
-		let varianceButton = this.createButton(group, 5, "Variance");
-		varianceButton.on("click", () => {this.sort("variance")});
+	dragstarted(d) {
+	  d3.select(this).raise().classed("active", true);
 	}
 
-	/* Creates a specific button */
-	createButton(svgGroup, index, label) {
-		let padding = 3;
+	dragged(d) {
+		let newIdx = Math.round( Math.min( Math.max( d3.event.x , 0 ) ) / d.width );
+		let firstClass = d.class; 
+		let secondClass = d3.select(".b" + newIdx).attr("class").split(" ")[0];
 
-		let group = svgGroup.append("g");
-		group.append("rect")
-			.attr("y", padding)
-			.attr("height", this.optionsHeight - 2 * padding)
-			.attr("x", (index * (this.optionsWidth / this.totalBars) + padding))
-			.attr("width", (this.optionsWidth / this.totalBars) - 2 * padding)
-			.classed("button", true);
+		d.newClass = secondClass;
 
-		/**/
-		group.append("text").text(label)
-			.attr("x", (index + .5) * (this.optionsWidth / this.totalBars))
-			.attr("y", ( 1.5 * this.optionsHeight / 4))
-			.style("text-anchor", "middle")
-			.classed("label", true);
 
-		/**/
-		group.append("text").text("===")
-			.attr("x", (index + .5) * (this.optionsWidth / this.totalBars))
-			.attr("y", (3.5 * this.optionsHeight / 4))
-			.style("text-anchor", "middle")
-			.classed("label", true);
+		let translateToZero = [-d.x, 0];
+		let translate = [Math.min( Math.max( d3.event.x , 0 )), 0];
 
-		group.append("rect")
-			.attr("y", padding)
-			.attr("height", this.optionsHeight - 2 * padding)
-			.attr("x", (index * (this.optionsWidth / this.totalBars) + padding))
-			.attr("width", (this.optionsWidth / this.totalBars) - 2 * padding)
-			.classed("button-overlay", true);
-
-		return group;
+		/* Give the class of bar the curser is over to the dragged bar. */
+		d3.select(this).attr("class", secondClass + " b" + d.idx  + " active bargroup");
+		d3.select(this).classed("active", false);
+		d3.select(this).attr("transform", "translate(" + translateToZero + ") translate(" + translate +")");
 	}
-	
+
+	dragended(d) {
+		d3.select(this).attr("transform", "");
+		let newIdx = Math.round( Math.min( Math.max( d3.event.x , 0 ) ) / d.width );
+
+		/* Give the old class to the bar that the cursor is over*/
+		d3.select(".b" + newIdx).attr("class",  d.class + " b" + newIdx + " bargroup");
+		
+		if (d3.event.y < d.self.buttonMenuHeight)
+			d.self.sort(d.sortField);
+		
+
+		d.self.update();
+
+		let otherData = d3.select(".b" + newIdx).datum();
+		otherData.class = d.class;
+		otherData.newClass = d.class;
+		let temp = otherData.sortField;
+		otherData.sortField = d.sortField;
+
+
+		d.class = d.newClass;
+		d.newClass = d.class;
+		d.sortField = temp;
+	}
+
+
 	/* Creates a group for each characteristic bar */
 	createGroups() {
-		this.svg.append("g").attr("id", "colorbar");
-		this.svg.append("g").attr("id", "timebar");
-		this.svg.append("g").attr("id", "branchesbar");
-		this.svg.append("g").attr("id", "samplesbar");
-		this.svg.append("g").attr("id", "depthbar");
-		this.svg.append("g").attr("id", "variancebar");
+		let heightScale = d3.scaleLinear().domain([0, 100]).range([0, this.height - this.barGroupHeight]);
+		let widthScale = d3.scaleLinear().domain([0, 100]).range([0, this.width]);
+		let invWidth = 1.0 / this.totalBars;
+
+		this.svg.selectAll("g").remove();
+
+		let barData = [];
+		let barNames = ["colorbar", "timebar", "branchesbar", "samplesbar", "depthbar", "variancebar", "boxIntersections", "objIntersections"];
+		let sortFields = ["color", "time", "branches", "samples", "depth", "variance", "boxIntersections", "objIntersections"];
+		for (let i = 0; i < this.totalBars; ++i) {
+			let entry = {
+				"class" : barNames[i],
+				"newClass" : barNames[i],
+				"idx" : i,
+				"width" : this.width / this.totalBars,
+				"self" : this,
+				"sortField" : sortFields[i],
+				"x": i * widthScale(100 / this.totalBars)
+			}
+			barData.push(entry);
+		}
+
+		let groups = this.svg.selectAll("g").data(barData);
+		let enterGroups = groups.enter().append("g");
+		let allGroups = groups.merge(enterGroups)
+
+		allGroups.each(function(d) { this.classList.add(d.class); this.classList.add("b" + d.idx); this.classList.add("bargroup"); })
+				.call(d3.drag().on("start", this.dragstarted).on("drag", this.dragged).on("end", this.dragended));
+
+
 		this.svg.append("g").attr("id", "selectableBar");
+		this.update();
 	}
 
 	/* Alters bounds to be within the image */
@@ -122,118 +138,352 @@ class ParallelBarView {
 		bounds[3] = Math.max(bounds[3], 0);
 	}
 
-	/* Updates the visualization to show data for pixels within the provided bounds */
-	updateBounds(bounds) {
-		if (this.rawData != null) {
-			this.sanitizeBounds(bounds, this.rawData.dimensions);
-			
-			let self = this;
-			let svg = this.svg;
-
-			/* Wrangle data from bounds */
-			let data=[];
-			for (let y = bounds[1]; y < bounds[3]; ++y) {
-				for (let x = bounds[0]; x < bounds[2]; ++x) {
-					let entry = {};
-
-					let color = {
-						"red" : -1,
-						"blue" : -1,
-						"green" : -1
-					};
-					color.red = this.rawData.Color[3 * (x + y * this.rawData.dimensions[0])];
-					color.blue = this.rawData.Color[3 * (x + y * this.rawData.dimensions[0]) + 1];
-					color.green = this.rawData.Color[3 * (x + y * this.rawData.dimensions[0]) + 2];
-					
-					entry.color = color;
-
-					entry.time = this.rawData.Render_time[x + y * this.rawData.dimensions[0]];
-					entry.branches = this.rawData.Secondary_rays[x + y * this.rawData.dimensions[0]];
-					entry.samples = this.rawData.Sample_count[x + y * this.rawData.dimensions[0]];
-					entry.depth = this.rawData.Depth_buffer[x + y * this.rawData.dimensions[0]];
-					entry.variance = this.rawData.Variance[x + y * this.rawData.dimensions[0]];
-					entry.x = x;
-					entry.y = y;
-					data.push(entry);
-
-				}
-			}
-			this.data = data;
+	update() {
+		this.updateMenu();
+		if (this.data) {
+			//this.createGroups();
+			this.updateButtonMenu();
 			this.updateBars(this.data);
+			//this.sort(this.lastSort);
 		}
 	}
 
+
+	updateMenu() 
+	{
+		let buttonVertOffset = 10;
+		let buttonWidth = 5;
+
+
+		let self = this;
+		let svg = this.menuSVG;
+		let scaleHeight = d3.scaleLinear().domain([0,100]).range([0, this.menuHeight]);
+		let scaleWidth = d3.scaleLinear().domain([0,100]).range([0, this.menuWidth]);
+
+		/* Clear the menu */
+		svg.selectAll("*").remove();
+
+		/* Add text for the current checkpoint */
+		let textGroup = svg.append("g").classed("textGroup", true);
+
+		textGroup.append("text")
+		.text(this.getCheckpointHeader(this.checkpoint))
+		.classed("h", true).classed("unselectable", true)
+		.attr("text-anchor", "middle")
+		.attr("x", scaleWidth(50)).attr("y", scaleHeight(25));
+
+
+		textGroup.append("text")
+		.text(this.getCheckpointLine1(this.checkpoint))
+		.classed("p", true).classed("unselectable", true)
+		.attr("text-anchor", "middle")
+		.attr("x", scaleWidth(50)).attr("y", scaleHeight(50));
+		textGroup.append("text")
+		.text(this.getCheckpointLine2(this.checkpoint))
+		.classed("p", true).classed("unselectable", true)
+		.attr("text-anchor", "middle")
+		.attr("x", scaleWidth(50)).attr("y", scaleHeight(65));
+		textGroup.append("text")
+		.text(this.getCheckpointLine3(this.checkpoint))
+		.classed("p", true).classed("unselectable", true)
+		.attr("text-anchor", "middle")
+		.attr("x", scaleWidth(50)).attr("y", scaleHeight(80));
+
+
+		/* Add next/previous buttons */
+		svg.append("rect")
+		.classed("button", true)
+		.attr("id", "imageMenuBackButton")
+		.attr("x", scaleWidth(5)).attr("y", scaleHeight(30+buttonVertOffset))
+		.attr("width", scaleWidth(buttonWidth)).attr("height", scaleHeight(40))
+		.on("click", function() { if (self.checkpoint > 0) self.checkpoint--; self.update();});
+
+		svg.append("line")
+		.classed("unselectable", true)
+		.attr("x1", scaleWidth(5 + 3)).attr("y1", scaleHeight(35+buttonVertOffset))
+		.attr("x2", scaleWidth(5 + 2)).attr("y2", scaleHeight(50+buttonVertOffset))
+		.attr("stroke-width", 2).attr("stroke", "white");
+
+		svg.append("line")
+		.classed("unselectable", true)
+		.attr("x1", scaleWidth(5+2)).attr("y1", scaleHeight(50+buttonVertOffset))
+		.attr("x2", scaleWidth(5+3)).attr("y2", scaleHeight(65+buttonVertOffset))
+		.attr("stroke-width", 2).attr("stroke", "white");
+
+		svg.append("rect")
+		.attr("id", "imageMenuNextButton")
+		.classed("button", true)
+		.attr("fill", "red")
+		.attr("x", scaleWidth(95-buttonWidth)).attr("y", scaleHeight(30+buttonVertOffset))
+		.attr("width", scaleWidth(buttonWidth)).attr("height", scaleHeight(40))
+		.on("click", function() { if (self.checkpoint < self.maxCheckpoint) self.checkpoint++; self.update();});
+
+		svg.append("line")
+		.classed("unselectable", true)
+		.attr("x1", scaleWidth(95-buttonWidth + 2)).attr("y1", scaleHeight(35+buttonVertOffset))
+		.attr("x2", scaleWidth(95-buttonWidth + 3)).attr("y2", scaleHeight(50+buttonVertOffset))
+		.attr("stroke-width", 2).attr("stroke", "white");
+
+		svg.append("line")
+		.classed("unselectable", true)
+		.attr("x1", scaleWidth(95-buttonWidth + 3)).attr("y1", scaleHeight(50+buttonVertOffset))
+		.attr("x2", scaleWidth(95-buttonWidth + 2)).attr("y2", scaleHeight(65+buttonVertOffset))
+		.attr("stroke-width", 2).attr("stroke", "white");
+	}
+
+	getCheckpointHeader(checkpoint) {
+		switch(checkpoint) {
+		    case 0:
+		        return "Correlation with Time";
+		    case 1:
+		        return "Why some rays take a long time";
+		    default:
+		        return "";
+		}
+	}
+
+	getCheckpointLine1(checkpoint) {
+		switch(checkpoint) {
+		    case 0:
+		        return "There is a correlation between these. ";
+		    case 1:
+		        return "Digging deeper into ray data ";
+		    default:
+		        return "";
+		}
+	}
+
+	getCheckpointLine2(checkpoint) {
+		switch(checkpoint) {
+		    case 0:
+		        return "";
+		    case 1:
+		        return "";
+		    default:
+		        return "";
+		}
+	}
+	
+	getCheckpointLine3(checkpoint) {
+		switch(checkpoint) {
+		    case 0:
+		        return "";
+		    case 1:
+		        return "";
+		    default:
+		        return "";
+		}
+	}
+
+	/* Updates the visualization to show data for pixels within the provided bounds */
+	updateBounds(bounds) {
+		if (this.rawData == null) return;
+
+		this.sanitizeBounds(bounds, this.rawData.dimensions);
+		
+		let skip = 0;
+		if (bounds[2] - bounds[0] > 16) skip = 2; // Helps keep the total bars under control
+
+		let self = this;
+		let svg = this.svg;
+
+		/* Wrangle data from bounds */
+		let data=[];
+		for (let y = bounds[1]; y < bounds[3]; y += 1 + skip) {
+			for (let x = bounds[0]; x < bounds[2]; x += 1 + skip) {
+				let entry = {};
+
+				let color = {
+					"red" : -1,
+					"blue" : -1,
+					"green" : -1
+				};
+				color.red = this.rawData.Color[3 * (x + y * this.rawData.dimensions[0])];
+				color.blue = this.rawData.Color[3 * (x + y * this.rawData.dimensions[0]) + 1];
+				color.green = this.rawData.Color[3 * (x + y * this.rawData.dimensions[0]) + 2];
+				
+				entry.color = color;
+
+				entry.time = this.rawData.Render_time[x + y * this.rawData.dimensions[0]];
+				entry.branches = this.rawData.Secondary_rays[x + y * this.rawData.dimensions[0]];
+				entry.samples = this.rawData.Sample_count[x + y * this.rawData.dimensions[0]];
+				entry.depth = this.rawData.Depth_buffer[x + y * this.rawData.dimensions[0]];
+				entry.variance = this.rawData.Variance[x + y * this.rawData.dimensions[0]];
+				entry.boxIntersections = this.rawData.Box_intersections[x + y * this.rawData.dimensions[0]];
+				entry.objIntersections = this.rawData.Primitive_intersections[x + y * this.rawData.dimensions[0]];
+				entry.x = x;
+				entry.y = y;
+				data.push(entry);
+
+			}
+		}
+		this.data = data;
+		//this.createGroups();
+		this.updateButtonMenu();
+		this.updateBars(this.data);
+		this.sort(this.lastSort);
+	}
+
+	
+	/* Creates a specific button */
+	createButton(svgGroup, label, sortFunction, parameter) {
+		if (svgGroup.empty()) return;
+		let data = svgGroup.datum();
+		let index = data.idx;
+		d3.select(".btn" + index).remove();
+		let heightScale = d3.scaleLinear().domain([0, 100]).range([0, this.height - this.barGroupHeight]);
+		let widthScale = d3.scaleLinear().domain([0, 100]).range([0, this.width]);
+		let invWidth = 1.0 / this.totalBars;
+
+		let verticalPad = heightScale(10);
+		let horizontalPad = heightScale(1);
+
+		let group = svgGroup.append("g");
+		group.classed(" btn" + index, true);
+		group.append("rect")
+			.attr("y", heightScale(0) + verticalPad)
+			.attr("height", heightScale(100) - (2.0 * verticalPad))
+			.attr("x", (widthScale(index * invWidth * 100) + horizontalPad))
+			.attr("width", (this.menuWidth * invWidth) - (2.0 * horizontalPad)) 
+			.attr("class", "button")
+			.classed("button", true);
+
+		group.append("text").text(label)
+			.attr("x", widthScale((index + .5) * invWidth * 100))
+			.attr("y", heightScale(50))
+			.style("text-anchor", "middle")
+			.style("alignment-baseline", "middle")
+			.classed("label", true).classed("unselectable", true);
+
+		//group.on("click", () => {this.sort(parameter); this.updateBars(this.data);})
+
+		return group;
+	}
+
+	updateButtonMenu() {
+		/* Color button */
+		let colorButton = this.createButton(d3.select(".colorbar"), "Color", this.sort, "color");
+
+		/* Time button */
+		let timeButton = this.createButton(d3.select(".timebar"), "Time", this.sort, "time");
+
+		/* Branches button */
+		let branchesButton = this.createButton(d3.select(".branchesbar"), "Branches", this.sort, "branches");
+		
+		/* Samples button */
+		let samplesButton = this.createButton(d3.select(".samplesbar"), "Samples", this.sort, "samples");
+		
+		/* Depth button */
+		let depthButton = this.createButton(d3.select(".depthbar"), "Depth", this.sort, "depth");
+
+		/* Variance button */
+		let varianceButton = this.createButton(d3.select(".variancebar"), "Variance", this.sort, "variance");
+		
+		/* Box Intersections button */
+		let boxIntersectionsButton = this.createButton(d3.select(".boxIntersections"), "Box", this.sort, "boxIntersections");
+		
+		/* Obj Intersections button */
+		let objIntersectionsButton = this.createButton(d3.select(".objIntersections"), "Obj", this.sort, "objIntersections");
+	}
+
+	/* Updates a specific bar */
+	updateBar(data, field, svgGroup, totalBars) {
+		if (svgGroup.empty()) return;
+
+
+		let parentData = svgGroup.datum();
+		let index = parentData.idx; 
+
+		let heightScale = d3.scaleLinear().domain([0, 100]).range([this.height - this.barGroupHeight,this.height]);
+		let widthScale = d3.scaleLinear().domain([0, 100])
+			.range([index * (this.barGroupWidth / totalBars), (index + 1) * (this.barGroupWidth / totalBars)]);
+		let dataLenInv = 1 / data.length; 
+
+		/* Remove all exiting rectangles*/
+		let rects = svgGroup.selectAll(".bar").data(data);
+		rects.exit().remove();
+
+		/* Append entering rectangles*/
+		let enterRects = rects.enter().append("rect").classed("bar", true);
+
+		/* For each enter rectangle, initialize an x offset and width */
+		enterRects.style("stroke-width", 0);
+
+		let allRects = enterRects.merge(rects);
+		allRects.attr("y", (d, i) => {return heightScale((i * dataLenInv) * 100)})
+			.attr("height", dataLenInv * this.barGroupHeight)
+			.attr("x", (d, i) => {return widthScale(0);})
+			.attr("width", this.barGroupWidth / totalBars);
+
+		return allRects;
+	}
+	
 	/* Updates all bars given an array of pixel data */
 	updateBars(data) {
 		/* Pixel color */
-		let colorBar = this.updateBar(data, "color", d3.select("#colorbar"), 6, 0);
-		colorBar.style("fill", (d, i) => {return d3.rgb(d.color.red,d.color.blue,d.color.green);});
+		let colorBar = this.updateBar(data, "color", d3.select(".colorbar"), this.totalBars);
+		if (colorBar) colorBar.style("fill", (d, i) => {return d3.rgb(d.color.red,d.color.blue,d.color.green);});
 
 		/* Pixel render time */
-		let timeBar = this.updateBar(data, "time", d3.select("#timebar"), 6, 1);
+		let timeBar = this.updateBar(data, "time", d3.select(".timebar"), this.totalBars);
 		var timeColor = d3.scaleLinear()
 			.domain([this.rawData.min_render_time, this.rawData.max_render_time])
-            .range(['white','red']);
-		timeBar.style("fill", (d) => {return timeColor(d.time);});
+            .range(['black','white']);
+		if (timeBar) timeBar.style("fill", (d) => {return timeColor(d.time);});
 
 		/* Total secondary rays */
-		let secondaryRayBar = this.updateBar(data, "branches", d3.select("#branchesbar"), 6, 2);
+		let secondaryRayBar = this.updateBar(data, "branches", d3.select(".branchesbar"), this.totalBars);
 		var srColor = d3.scaleLinear()
 			.domain([this.rawData.min_secondary_rays, this.rawData.max_secondary_rays])
-            .range(['white','red']);
-		secondaryRayBar.style("fill", (d) => {return srColor(d.branches);});
+            .range(['black','white']);
+		if (secondaryRayBar) secondaryRayBar.style("fill", (d) => {return srColor(d.branches);});
 
 		/* Total samples */
-		let samplesBar = this.updateBar(data, "samples", d3.select("#samplesbar"), 6, 3);
+		let samplesBar = this.updateBar(data, "samples", d3.select(".samplesbar"), this.totalBars);
 		var scColor = d3.scaleLinear()
 			.domain([this.rawData.min_sample_count, this.rawData.max_sample_count])
-            .range(['white','red']);
-		samplesBar.style("fill", (d) => {return scColor(d.samples);});
+            .range(['black','white']);
+		if (samplesBar) samplesBar.style("fill", (d) => {return scColor(d.samples);});
 
 		/* Pixel depth */
-		let depthBar = this.updateBar(data, "depth", d3.select("#depthbar"), 6, 4);
+		let depthBar = this.updateBar(data, "depth", d3.select(".depthbar"), this.totalBars);
 		var dColor = d3.scaleLinear()
 			.domain([this.rawData.min_depth, this.rawData.max_depth])
-            .range(['white','red']);
-		depthBar.style("fill", (d) => {return dColor(d.depth);});
+            .range(['black','white']);
+		if (depthBar) depthBar.style("fill", (d) => {return dColor(d.depth);});
 
 		/* Pixel variance */
-		let varianceBar = this.updateBar(data, "variances", d3.select("#variancebar"), 6, 5);
+		let varianceBar = this.updateBar(data, "variances", d3.select(".variancebar"), this.totalBars);
 		var vColor = d3.scaleLinear()
 			.domain([this.rawData.min_variance, this.rawData.max_variance])
-            .range(['white','red']);
-		varianceBar.style("fill", (d) => {return vColor(d.variance);});
+            .range(['black','white']);
+		if (varianceBar) varianceBar.style("fill", (d) => {return vColor(d.variance);});
+
+		/* Ray Box interections */
+		let boxBar = this.updateBar(data, "boxIntersections", d3.select(".boxIntersections"), this.totalBars);
+		var vColor = d3.scaleLinear()
+			.domain([this.rawData.min_box_intersections, this.rawData.max_box_intersections])
+            .range(['black','white']);
+		if (boxBar) boxBar.style("fill", (d) => {return vColor(d.boxIntersections);});
+
+		/* Ray Obj interections */
+		let objBar = this.updateBar(data, "objIntersections", d3.select(".objIntersections"), this.totalBars);
+		var vColor = d3.scaleLinear()
+			.domain([this.rawData.min_primitive_intersections, this.rawData.max_primitive_intersections])
+            .range(['black','white']);
+		if (objBar) objBar.style("fill", (d) => {return vColor(d.objIntersections);});
 
 		/* Selectable bars */
-		let selectableBar = this.updateSelectable(data, d3.select("#selectableBar"))
-	}
-	
-	/* Updates a specific bar */
-	updateBar(data, field, svgGroup, totalBars, index) {
-		let rects = svgGroup.selectAll("rect").data(data);
-		rects.exit().remove();
-		let enterRects = rects.enter().append("rect");
-
-		let barWidth = (this.width / totalBars);
-		let barHeight = (1 / data.length) * this.height;
-		let dataLenInv = 1 / data.length; 
-
-		enterRects
-			.attr("x", (d, i) => {return index * barWidth;})
-			.attr("width", barWidth)
-			.style("stroke-width", 0);
-
-		let allRects = enterRects.merge(rects);
-		allRects.attr("y", (d, i) => {return (i * dataLenInv) * this.height})
-			.attr("height", barHeight);
-
-		return allRects;
+		let selectableBar = this.updateSelectable(data, d3.select(".selectableBar"))
 	}
 
 	/* Similar to updateBar, this updates a selectable row overlay. When rows are selected, 
 			the treeview and image view are also updated. */
 	updateSelectable(data, svgGroup) {
 		let self = this;
+		let heightScale = d3.scaleLinear().domain([0, 100]).range([this.height - this.barGroupHeight,this.height]);
+		let widthScale = d3.scaleLinear().domain([0, 100]).range([0, this.barGroupWidth]);
+		let dataLenInv = 1 / data.length; 
         
         /* Temporarily deselect the selected row, if selected. */
         d3.select(".row-overlay.active").classed("active", false);
@@ -242,18 +492,14 @@ class ParallelBarView {
 		rects.exit().remove();
 		let enterRects = rects.enter().append("rect");
 
-		let barWidth = this.width;
-		let barHeight = (1 / data.length) * this.height;
-		let dataLenInv = 1 / data.length; 
-
 		enterRects
 			.attr("x", 0)
-			.attr("width", barWidth)
+			.attr("width", widthScale(100))
 			.style("stroke-width", 0);
 
 		let allRects = enterRects.merge(rects);
-		allRects.attr("y", (d, i) => {return (i * dataLenInv) * this.height})
-			.attr("height", barHeight)
+		allRects.attr("y", (d, i) => {return heightScale((i * dataLenInv) * 100)})
+			.attr("height", dataLenInv * this.barGroupHeight)
 			.classed("row-overlay", true)
 			.classed("active", (d,i) => { return (d.x == self.selectedx && d.y == self.selectedy);})
 			.on("mouseover", function(d,i) {
@@ -278,14 +524,20 @@ class ParallelBarView {
 	/* Resizes the visualization. Good for device rotation/browser scaling */
 	resize() {
 		/* Update width and height just incase canvas size has changed */
-		this.width = $("#bar-chart svg").parent().width();
-    	this.height = $("#bar-chart svg").parent().height();
-    	this.optionsWidth = $("#pixel-analysis-options").width();
-    	this.optionsHeight = $("#pixel-analysis-options").height();
+		this.width = $("#pixel-analysis-viewport svg").parent().width();
+    	this.height = $("#pixel-analysis-viewport svg").parent().height();
+    	this.barGroupHeight = this.height * .9;
+    	this.barGroupWidth = this.width;
+    	this.buttonMenuHeight = this.height - this.barGroupHeight;
+    	this.buttonMenuWidth = this.width;
+    	this.menuWidth = $("#pixel-analysis-menu").width();
+    	this.menuHeight = $("#pixel-analysis-menu").height();
 		this.svg.attr("width", this.width).attr("height", this.height);
-		this.optionsSvg.attr("width", this.optionsWidth)
-						.attr("height", this.optionsHeight);
-		this.createButtons();
+		this.menuSVG.attr("width", this.menuWidth)
+						.attr("height", this.menuHeight);
+		this.createGroups();
+
+		this.update()
 	}
 
 	setData(_data){
@@ -316,7 +568,7 @@ class ParallelBarView {
 
 	/* Sort by either hue, saturation, or value. */
 	sortColor() {
-		this.colorAsc = !this.colorAsc;
+		this.lastSort = "color";
 		this.data.sort(
             (x, y) => {
 	        	return this.rgbToHsv(x.color.red, x.color.green, x.color.blue)[0] 
@@ -331,13 +583,18 @@ class ParallelBarView {
 
 	/* Sort the provided numberic field */
 	sort(field) {
-		this[field + "Asc"] = !this[field + "Asc"];
+		this.data.reverse();
+		if (field == "color") {this.sortColor(); return;}
+
+		this.lastSort = field;
 
 		this.data.sort(
             (x, y) => {
             return x[field] - y[field];
           }
         );
+
+		console.log(field);
 
         if (!this[field + "Asc"]) this.data.reverse();
 

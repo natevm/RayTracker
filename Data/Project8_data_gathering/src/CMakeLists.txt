@@ -3,6 +3,7 @@ add_subdirectory(tinyxml)
 
 set(SRC
 	${tinyxml_SRC}
+	${CMAKE_CURRENT_SOURCE_DIR}/timer.h
 	${CMAKE_CURRENT_SOURCE_DIR}/cyBVH.h
 	${CMAKE_CURRENT_SOURCE_DIR}/cyColor.h
 	${CMAKE_CURRENT_SOURCE_DIR}/cyCore.h

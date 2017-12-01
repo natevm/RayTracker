@@ -4,6 +4,66 @@
 		"selected_items":
 		[
 			[
+				"image",
+				"imageview"
+			],
+			[
+				"enter",
+				"enterRects"
+			],
+			[
+				"sort",
+				"sortColor"
+			],
+			[
+				"update",
+				"updateBars"
+			],
+			[
+				"co",
+				"colors"
+			],
+			[
+				"sample",
+				"sampleCounts"
+			],
+			[
+				"tra",
+				"transparent"
+			],
+			[
+				"create",
+				"createOptionButton"
+			],
+			[
+				"svg",
+				"svgGroup"
+			],
+			[
+				"dep",
+				"depths"
+			],
+			[
+				"secon",
+				"secondaryRays"
+			],
+			[
+				"var",
+				"variances"
+			],
+			[
+				"total",
+				"totalBars"
+			],
+			[
+				"op",
+				"optimizeSpeed"
+			],
+			[
+				"stroke",
+				"stroke-width"
+			],
+			[
 				"brush",
 				"brushWidth"
 			],
@@ -78,56 +138,16 @@
 			[
 				"x",
 				"xScaleXOffset"
-			],
-			[
-				"update",
-				"updateBarChart"
 			]
 		]
 	},
 	"buffers":
 	[
 		{
-			"file": "Styles/flexbox.css",
+			"file": "Scripts/ParallelBarView.js",
 			"settings":
 			{
-				"buffer_size": 3575,
-				"encoding": "UTF-8",
-				"line_ending": "Windows"
-			}
-		},
-		{
-			"file": "Styles/viewport.css",
-			"settings":
-			{
-				"buffer_size": 180,
-				"encoding": "UTF-8",
-				"line_ending": "Windows"
-			}
-		},
-		{
-			"file": "Styles/fonts.css",
-			"settings":
-			{
-				"buffer_size": 993,
-				"encoding": "UTF-8",
-				"line_ending": "Windows"
-			}
-		},
-		{
-			"file": "Scripts/main.js",
-			"settings":
-			{
-				"buffer_size": 356,
-				"encoding": "UTF-8",
-				"line_ending": "Windows"
-			}
-		},
-		{
-			"file": "index.html",
-			"settings":
-			{
-				"buffer_size": 1215,
+				"buffer_size": 20203,
 				"encoding": "UTF-8",
 				"line_ending": "Windows"
 			}
@@ -136,16 +156,7 @@
 			"file": "Scripts/ImageView.js",
 			"settings":
 			{
-				"buffer_size": 2509,
-				"encoding": "UTF-8",
-				"line_ending": "Windows"
-			}
-		},
-		{
-			"file": "/C/git/UofU/CS6630/2017-dataviscourse-homework/hw6/public/js/tileChart.js",
-			"settings":
-			{
-				"buffer_size": 7517,
+				"buffer_size": 10200,
 				"line_ending": "Windows"
 			}
 		}
@@ -188,11 +199,39 @@
 	"expanded_folders":
 	[
 		"/C/git/UofU/CS6630/RayTracker",
+		"/C/git/UofU/CS6630/RayTracker/Data",
+		"/C/git/UofU/CS6630/RayTracker/Data/64",
 		"/C/git/UofU/CS6630/RayTracker/Scripts",
+		"/C/git/UofU/CS6630/RayTracker/Sketches",
 		"/C/git/UofU/CS6630/RayTracker/Styles"
 	],
 	"file_history":
 	[
+		"/C/Users/Nate/AppData/Local/Temp/scp02907/home/natevm/public_html/courses/cs6630/RayTracker/Scripts/ImageView.js",
+		"/C/Users/Nate/AppData/Local/Temp/scp04945/home/natevm/public_html/courses/cs6630/RayTracker/index.html",
+		"/C/Users/Nate/AppData/Local/Temp/scp22531/home/natevm/public_html/courses/cs6630/RayTracker/Styles/flexbox.css",
+		"/C/Users/Nate/AppData/Local/Temp/scp22540/home/natevm/public_html/courses/cs6630/RayTracker/Styles/fonts.css",
+		"/C/Users/Nate/AppData/Local/Temp/scp44104/home/natevm/public_html/courses/cs6630/RayTracker/Styles/viewport.css",
+		"/C/Users/Nate/AppData/Local/Temp/scp59395/home/natevm/public_html/courses/cs6630/RayTracker/Scripts/main.js",
+		"/C/Users/Nate/AppData/Local/Temp/scp38082/home/natevm/public_html/courses/cs6630/RayTracker/Styles/colors.css",
+		"/C/Users/Nate/AppData/Local/Temp/scp14140/home/natevm/public_html/courses/cs6630/RayTracker/Scripts/ParallelBarView.js",
+		"/C/git/UofU/CS6630/RayTracker/Data/Project8_data_gathering/CMakeLists.txt",
+		"/C/Users/Nate/AppData/Local/Temp/scp57674/home/natevm/public_html/courses/cs6630/RayTracker/Data/Ray_tracing_test_data.json",
+		"/C/git/UofU/CS6630/RayTracker/Data/Project8_data_gathering/src/CMakeLists.txt",
+		"/C/git/UofU/CS6630/RayTracker/Data/Project8_data_gathering/build/scene_7.xml",
+		"/C/Users/Nate/AppData/Local/Temp/scp40786/home/natevm/public_html/courses/cs6630/hw6/public/css/style.css",
+		"/C/Users/Nate/AppData/Local/Temp/scp20507/home/natevm/public_html/courses/cs6630/hw6/public/js/electoralVoteChart.js",
+		"/C/git/UofU/CS6630/RayTracker/Data/Project8_data_gathering/build/ray_info.json",
+		"/C/git/UofU/CS6630/RayTracker/Data/64/ray_info_2.json",
+		"/C/git/UofU/CS6630/RayTracker/Styles/flexbox.css",
+		"/C/git/UofU/CS6630/RayTracker/Styles/viewport.css",
+		"/C/git/UofU/CS6630/RayTracker/Styles/fonts.css",
+		"/C/Users/Nate/AppData/Local/Temp/scp31407/home/natevm/public_html/courses/cs6630/RayTracker/Scripts/RayTreeView.js",
+		"/C/git/UofU/CS6630/RayTracker/Scripts/ImageView.js",
+		"/C/git/UofU/CS6630/2017-dataviscourse-homework/hw6/public/js/tileChart.js",
+		"/C/git/UofU/CS6630/RayTracker/Scripts/main.js",
+		"/C/git/UofU/CS6630/RayTracker/index.html",
+		"/C/Users/Nate/AppData/Local/Temp/scp07719/home/natevm/public_html/courses/cs6630/RayTracker/Scripts/BarChartView.js",
 		"/C/Users/Nate/AppData/Local/Temp/scp15722/home/natevm/public_html/courses/cs6630/RayTracker/index.html",
 		"/C/Users/Nate/AppData/Local/Temp/scp16392/home/natevm/public_html/courses/cs6630/RayTracker/Styles/viewport.css",
 		"/C/Users/Nate/AppData/Local/Temp/scp16520/home/natevm/public_html/courses/cs6630/RayTracker/Styles/fonts.css",
@@ -288,7 +327,7 @@
 	],
 	"find":
 	{
-		"height": 49.0
+		"height": 54.0
 	},
 	"find_in_files":
 	{
@@ -302,6 +341,51 @@
 		"case_sensitive": true,
 		"find_history":
 		[
+			"updateBar",
+			"createButton",
+			"group",
+			"color",
+			"button",
+			"buttons",
+			"createGroups",
+			"updateButtonMenu",
+			"this.",
+			"Brushable",
+			"brushable",
+			"createOptionButton",
+			"createOptions",
+			"x",
+			"svg",
+			"group",
+			"optionsHeight",
+			"totalBars",
+			"#bar-chart",
+			"sanitize",
+			"\t\t\t\n",
+			"Depth",
+			"depth",
+			"depths",
+			"SampleCount",
+			"sampleCount",
+			"sampleCountGroup",
+			"sampleCounts",
+			"SecondaryRay",
+			"secondaryRay",
+			"secondaryRays",
+			"Time",
+			"time",
+			"times",
+			"Color",
+			"color",
+			"colors",
+			"project8_data_gathering_SRC",
+			"prj11",
+			"projecet8",
+			"prj11",
+			"min",
+			"256",
+			"nan",
+			"viewport",
 			"x",
 			"x0",
 			"255",
@@ -385,6 +469,7 @@
 		"regex": true,
 		"replace_history":
 		[
+			"0.0",
 			" MIN"
 		],
 		"reverse": false,
@@ -396,166 +481,24 @@
 	"groups":
 	[
 		{
-			"selected": 5,
+			"selected": 0,
 			"sheets":
 			[
 				{
 					"buffer": 0,
-					"file": "Styles/flexbox.css",
+					"file": "Scripts/ParallelBarView.js",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 3575,
+						"buffer_size": 20203,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								588,
-								588
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/CSS/CSS.sublime-syntax",
-							"translate_tabs_to_spaces": false
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 2,
-					"type": "text"
-				},
-				{
-					"buffer": 1,
-					"file": "Styles/viewport.css",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 180,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								137,
-								137
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/CSS/CSS.sublime-syntax"
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 1,
-					"type": "text"
-				},
-				{
-					"buffer": 2,
-					"file": "Styles/fonts.css",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 993,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								0,
-								0
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/CSS/CSS.sublime-syntax"
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 6,
-					"type": "text"
-				},
-				{
-					"buffer": 3,
-					"file": "Scripts/main.js",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 356,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								356,
-								356
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/JavaScript/JavaScript.sublime-syntax"
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 4,
-					"type": "text"
-				},
-				{
-					"buffer": 4,
-					"file": "index.html",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 1215,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								793,
-								793
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/HTML/HTML.sublime-syntax",
-							"translate_tabs_to_spaces": false
-						},
-						"translation.x": 0.0,
-						"translation.y": 677.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 3,
-					"type": "text"
-				},
-				{
-					"buffer": 5,
-					"file": "Scripts/ImageView.js",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 2509,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								563,
-								563
+								1533,
+								1533
 							]
 						],
 						"settings":
@@ -564,40 +507,39 @@
 							"translate_tabs_to_spaces": false
 						},
 						"translation.x": 0.0,
-						"translation.y": 485.0,
+						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
 					"stack_index": 0,
 					"type": "text"
 				},
 				{
-					"buffer": 6,
-					"file": "/C/git/UofU/CS6630/2017-dataviscourse-homework/hw6/public/js/tileChart.js",
-					"semi_transient": false,
+					"buffer": 1,
+					"file": "Scripts/ImageView.js",
+					"semi_transient": true,
 					"settings":
 					{
-						"buffer_size": 7517,
+						"buffer_size": 10200,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								58,
-								41
+								7799,
+								7724
 							]
 						],
 						"settings":
 						{
 							"syntax": "Packages/JavaScript/JavaScript.sublime-syntax",
-							"tab_size": 4,
-							"translate_tabs_to_spaces": true
+							"translate_tabs_to_spaces": false
 						},
 						"translation.x": 0.0,
-						"translation.y": 0.0,
+						"translation.y": 7417.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 5,
+					"stack_index": 1,
 					"type": "text"
 				}
 			]
@@ -605,7 +547,7 @@
 	],
 	"incremental_find":
 	{
-		"height": 49.0
+		"height": 44.0
 	},
 	"input":
 	{
@@ -642,7 +584,7 @@
 	"project": "RayTracker.sublime-project",
 	"replace":
 	{
-		"height": 94.0
+		"height": 102.0
 	},
 	"save_all_on_build": true,
 	"select_file":
@@ -656,7 +598,7 @@
 	},
 	"select_project":
 	{
-		"height": 500.0,
+		"height": 625.0,
 		"last_filter": "",
 		"selected_items":
 		[
@@ -665,7 +607,7 @@
 				"C:\\git\\UofU\\CS6620\\cs6620_subl_workspace.sublime-workspace"
 			]
 		],
-		"width": 380.0
+		"width": 475.0
 	},
 	"select_symbol":
 	{
@@ -684,7 +626,7 @@
 	"show_open_files": false,
 	"show_tabs": true,
 	"side_bar_visible": true,
-	"side_bar_width": 420.0,
+	"side_bar_width": 333.0,
 	"status_bar_visible": true,
 	"template_settings":
 	{

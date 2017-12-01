@@ -9,7 +9,7 @@
 }
 
 .brush {
-	fill: rgba(0, 0, 0, .3);
+	fill: rgba(255, 255, 255, .3);
 	stroke-width: 3;
 	stroke: rgb(0,0,0);
 }

@@ -7,6 +7,7 @@ function InitializeAll() {
 
 function UpdateAll() {
 	ImageView.update();
+	ParallelBarView.update();
 	RayTreeView.update();
 }
 
@@ -16,11 +17,11 @@ document.addEventListener("DOMContentLoaded", function(event) {
 	UpdateAll();
 	
 	//load the pixel dataset
-	d3.json("./Data/64/pixeldata.json", function(error, data){
+	d3.json("./Data/128/pixeldata.json", function(error, data){
 		console.log(error);
 		console.log(data);
 		ParallelBarView.setData(data.PixelData);
-
+		ImageView.setDimensions(data.PixelData.dimensions);
 		UpdateAll();
 	});
 
@@ -36,5 +37,5 @@ document.addEventListener("DOMContentLoaded", function(event) {
 window.onresize = function(event) {
 	ParallelBarView.resize();
     ImageView.resize();
-	RayTreeView.resize();
+	// RayTreeView.resize();
 };

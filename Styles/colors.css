@@ -5,39 +5,72 @@
 	--transparent: rgba(0,0,0,0);
 	--transparent1: rgba(0,0,0,.1);
 	--transparent2: rgba(0,0,0,.2);
+	--offWhite: rgba(255, 255, 255, 0.75);
+	--pink: #e44c65;
+	--transparentPink1: rgba(228, 76, 101, .5);
+	--transparentPink2: rgba(228, 76, 101, 1.0);
+	--transparentPink3: rgba(228, 76, 101, .75);
 }
 
 body {
 	background-color: var(--main-bg-color);
 }
 
-#help-toggle, #viewport-options, #pixel-view-toggle, 
-#three-d-view-toggle, #pixel-analysis-options, 
-#bar-chart, #tree-view  {
+#help-toggle, #image-menu, #image-viewport, #pixel-view-toggle, 
+#three-d-view-toggle, #pixel-analysis-menu, 
+#pixel-analysis-viewport {
 	background-color: var(--transparent-color1);
 	/*box-shadow: 0 0 0.25em 0 rgba(0, 0, 0, 0.25);*/
 	margin: 1px;
 }
 
+.unselectable{
+	/* Dont select text when clicking this */
+	-webkit-user-select: none; /* Chrome/Safari */        
+	-moz-user-select: none; /* Firefox */
+	-ms-user-select: none; /* IE10+ */
+
+	/* Rules below not implemented in browsers yet */
+	-o-user-select: none;
+	user-select: none;
+
+	pointer-events: none;
+}
 
 .button {
-    fill: var(--transparent-color1);
+/*    -webkit-transition-duration: 0.2s;
+    
+	rx: 2;
+	ry: 2;
+    fill: var(--transparentPink1);*/
+
+
+    transition-duration: 0.2s;
+	/*fill: none;*/
+
+	stroke: rgb(0,0,0)
+    rx: 4px;
+    ry: 4px;
+
+
+    stroke: rgba(255,255,255,255);
+    stroke-width:4px;
+    fill-opacity:0.0;
+    stroke-opacity:0.9;
+}
+
+.button:hover {
+    fill: var(--transparentPink2);
+    fill-opacity:1.0;
+
+}
+
+.button:active {
+    fill: var(--transparentPink3);
 }
 
 .button-overlay {
-    fill: var(--transparent);
-	pointer-events: all;
-        -webkit-transition-duration: 0.4s; /* Safari */
-    transition-duration: 0.4s;
-}
-
-.button-overlay:hover{
-	fill:var(--transparent1);
-	cursor:pointer;
-}
-
-.button-overlay:active{
-	fill:var(--transparent2);
+	fill:none;
 }
 
 .label {
@@ -59,4 +92,8 @@ body {
 
 .row-overlay.active {
 	fill:var(--transparent2);
+}
+
+.bargroup{
+	/*transition-duration: 0.2s;*/
 }
