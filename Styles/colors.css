@@ -84,14 +84,17 @@ body {
 
 .row-overlay {
 	fill:var(--transparent);
+	stroke-width: 3px;
+	stroke: rgb(0,0,0);
+	transition-duration: 0.2s;
 }
 
 .row-overlay.hover {
-	fill:var(--transparent1);
+	fill: rgba(0, 255, 0, .2);
 }
 
 .row-overlay.active {
-	fill:var(--transparent2);
+	fill: rgba(0, 255, 0, .4);
 }
 
 .bargroup{

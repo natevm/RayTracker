@@ -96,6 +96,7 @@ class ParallelBarView {
 		let invWidth = 1.0 / this.totalBars;
 
 		this.svg.selectAll("g").remove();
+		let bargroupsgroup = this.svg.append("g");
 
 		let barData = [];
 		let barNames = ["colorbar", "timebar", "branchesbar", "samplesbar", "depthbar", "variancebar", "boxIntersections", "objIntersections"];
@@ -113,7 +114,7 @@ class ParallelBarView {
 			barData.push(entry);
 		}
 
-		let groups = this.svg.selectAll("g").data(barData);
+		let groups = bargroupsgroup.selectAll("g").data(barData);
 		let enterGroups = groups.enter().append("g");
 		let allGroups = groups.merge(enterGroups)
 
@@ -121,7 +122,7 @@ class ParallelBarView {
 				.call(d3.drag().on("start", this.dragstarted).on("drag", this.dragged).on("end", this.dragended));
 
 
-		this.svg.append("g").attr("id", "selectableBar");
+		this.svg.append("g").classed("selectableBar overlay", true);
 		this.update();
 	}
 
@@ -355,8 +356,6 @@ class ParallelBarView {
 			.style("alignment-baseline", "middle")
 			.classed("label", true).classed("unselectable", true);
 
-		//group.on("click", () => {this.sort(parameter); this.updateBars(this.data);})
-
 		return group;
 	}
 
@@ -488,7 +487,8 @@ class ParallelBarView {
         /* Temporarily deselect the selected row, if selected. */
         d3.select(".row-overlay.active").classed("active", false);
 
-		let rects = svgGroup.selectAll("rect").data(data);
+        svgGroup.append("rect").classed(".bar", true);
+		let rects = svgGroup.selectAll(".bar").data(data);
 		rects.exit().remove();
 		let enterRects = rects.enter().append("rect");
 
