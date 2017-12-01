@@ -11,9 +11,9 @@ class ParallelBarView {
 		this.svg = this.barchartDiv.append("svg");
 		this.width = $("#pixel-analysis-viewport").width();
     	this.height = $("#pixel-analysis-viewport").height();
-    	this.barGroupHeight = this.height * .9;
+    	this.barGroupHeight = this.height * .85;
     	this.barGroupWidth = this.width;
-    	this.buttonMenuHeight = this.height - this.barGroupHeight;
+    	this.buttonMenuHeight = this.height * .075;
     	this.buttonMenuWidth = this.width;
 		this.svg.attr("width", this.width).attr("height", this.height);
 		this.totalBars = 8; // Currently only 6 characteristics
@@ -42,49 +42,51 @@ class ParallelBarView {
 		this.createGroups();
 	};
 
-	dragstarted(d) {
-	  d3.select(this).raise().classed("active", true);
-	}
-
+	/* Group drag events */
+	dragstarted(d) { d3.select(this).raise().classed("active", true); }
 	dragged(d) {
-		let newIdx = Math.round( Math.min( Math.max( d3.event.x , 0 ) ) / d.width );
-		let firstClass = d.class; 
-		let secondClass = d3.select(".b" + newIdx).attr("class").split(" ")[0];
+		/* Determine the column we might swap with */
+		let hoveredColumn = Math.round( Math.min( Math.max( d3.event.x , 0 ) ) / d.width );
+		let secondClass = d3.select(".b" + hoveredColumn).attr("class").split(" ")[0];
 
+		/* Store that column's class for reference*/
 		d.newClass = secondClass;
 
-
+		/* Translate the current column. */
 		let translateToZero = [-d.x, 0];
 		let translate = [Math.min( Math.max( d3.event.x , 0 )), 0];
-
-		/* Give the class of bar the curser is over to the dragged bar. */
-		d3.select(this).attr("class", secondClass + " b" + d.idx  + " active bargroup");
-		d3.select(this).classed("active", false);
 		d3.select(this).attr("transform", "translate(" + translateToZero + ") translate(" + translate +")");
+
+		/* Add active to this */
+		d3.select(this).classed("active", true);
 	}
-
 	dragended(d) {
+		/* Remove the transform from the dragged bar. */
 		d3.select(this).attr("transform", "");
-		let newIdx = Math.round( Math.min( Math.max( d3.event.x , 0 ) ) / d.width );
 
-		/* Give the old class to the bar that the cursor is over*/
-		d3.select(".b" + newIdx).attr("class",  d.class + " b" + newIdx + " bargroup");
+
+
+		/* Instead, swap classes between the bars. */
+		let hoveredColumn = Math.round( Math.min( Math.max( d3.event.x , 0 ) ) / d.width );
+		d3.select(this).attr("class", d.newClass + " b" + d.idx  + " bargroup");
+		d3.select(".b" + hoveredColumn).attr("class",  d.class + " b" + hoveredColumn + " bargroup");
 		
 		if (d3.event.y < d.self.buttonMenuHeight)
 			d.self.sort(d.sortField);
 		
-
+		/* Update the bars */
 		d.self.update();
 
-		let otherData = d3.select(".b" + newIdx).datum();
+
+		let otherData = d3.select(".b" + hoveredColumn).datum();
+
 		otherData.class = d.class;
 		otherData.newClass = d.class;
-		let temp = otherData.sortField;
-		otherData.sortField = d.sortField;
-
-
 		d.class = d.newClass;
 		d.newClass = d.class;
+		
+		let temp = otherData.sortField;
+		otherData.sortField = d.sortField;
 		d.sortField = temp;
 	}
 
@@ -331,21 +333,21 @@ class ParallelBarView {
 		if (svgGroup.empty()) return;
 		let data = svgGroup.datum();
 		let index = data.idx;
-		d3.select(".btn" + index).remove();
-		let heightScale = d3.scaleLinear().domain([0, 100]).range([0, this.height - this.barGroupHeight]);
+		d3.select(".btn" + index + ".srt").remove();
+		let heightScale = d3.scaleLinear().domain([0, 100]).range([0, this.buttonMenuHeight]);
 		let widthScale = d3.scaleLinear().domain([0, 100]).range([0, this.width]);
 		let invWidth = 1.0 / this.totalBars;
 
-		let verticalPad = heightScale(10);
-		let horizontalPad = heightScale(1);
+		let verticalPad = 2;//heightScale(10);
+		let horizontalPad = 2;//widthScale(1);
 
 		let group = svgGroup.append("g");
-		group.classed(" btn" + index, true);
+		group.classed("btn" + index, true).classed("srt", true);
 		group.append("rect")
-			.attr("y", heightScale(0) + verticalPad)
-			.attr("height", heightScale(100) - (2.0 * verticalPad))
 			.attr("x", (widthScale(index * invWidth * 100) + horizontalPad))
+			.attr("y", heightScale(0) + verticalPad)
 			.attr("width", (this.menuWidth * invWidth) - (2.0 * horizontalPad)) 
+			.attr("height", heightScale(100) - (2.0 * verticalPad))
 			.attr("class", "button")
 			.classed("button", true);
 
@@ -359,41 +361,106 @@ class ParallelBarView {
 		return group;
 	}
 
+	createMoveHandle(svgGroup) {
+		if (svgGroup.empty()) return;
+		
+		let data = svgGroup.datum();
+		let index = data.idx;
+		d3.select(".btn" + index + ".hndl").remove();
+		let heightScale = d3.scaleLinear().domain([0, 100]).range([0, this.buttonMenuHeight]);
+		let widthScale = d3.scaleLinear().domain([0, 100]).range([0, this.width]);
+		let yScale = d3.scaleLinear().domain([0, 100]).range([this.buttonMenuHeight + this.barGroupHeight, this.height]);
+		let invWidth = 1.0 / this.totalBars;
+
+		let verticalPad = 2;//yScale(10);
+		let horizontalPad = 2;//widthScale(1);
+
+		let x = (widthScale(index * invWidth * 100) + horizontalPad);
+		let y = (yScale(0) + verticalPad);
+		let btnWidth = (this.menuWidth * invWidth) - (2.0 * horizontalPad);
+		let btnHeight = heightScale(100) - (2.0 * verticalPad);
+
+		let group = svgGroup.append("g");
+		group.classed(" btn" + index, true).classed("hndl", true);
+		group.append("rect").attr("x", x).attr("y", y)
+			.attr("width", btnWidth).attr("height", btnHeight)
+			.attr("class", "button")
+			.classed("button", true);
+
+		group.append("line")
+		.classed("unselectable", true)
+		.attr("x1", x + btnWidth * .25)
+		.attr("y1", y + btnHeight * .5)
+		.attr("x2", x + btnWidth * .75)
+		.attr("y2", y + btnHeight * .5)
+		.attr("stroke-width", 2).attr("stroke", "white");
+
+		group.append("line")
+		.classed("unselectable", true)
+		.attr("x1", x + btnWidth * .25)
+		.attr("y1", y + btnHeight * .5)
+		.attr("x2", x + btnWidth * .4)
+		.attr("y2", y + btnHeight * .6)
+		.attr("stroke-width", 2).attr("stroke", "white");
+
+		group.append("line")
+		.classed("unselectable", true)
+		.attr("x1", x + btnWidth * .25)
+		.attr("y1", y + btnHeight * .5)
+		.attr("x2", x + btnWidth * .4)
+		.attr("y2", y + btnHeight * .4)
+		.attr("stroke-width", 2).attr("stroke", "white");
+
+
+		group.append("line")
+		.classed("unselectable", true)
+		.attr("x1", x + btnWidth * .75)
+		.attr("y1", y + btnHeight * .5)
+		.attr("x2", x + btnWidth * .6)
+		.attr("y2", y + btnHeight * .6)
+		.attr("stroke-width", 2).attr("stroke", "white");
+
+		group.append("line")
+		.classed("unselectable", true)
+		.attr("x1", x + btnWidth * .75)
+		.attr("y1", y + btnHeight * .5)
+		.attr("x2", x + btnWidth * .6)
+		.attr("y2", y + btnHeight * .4)
+		.attr("stroke-width", 2).attr("stroke", "white");
+
+		return group;
+	}
+
 	updateButtonMenu() {
-		/* Color button */
-		let colorButton = this.createButton(d3.select(".colorbar"), "Color", this.sort, "color");
-
-		/* Time button */
-		let timeButton = this.createButton(d3.select(".timebar"), "Time", this.sort, "time");
-
-		/* Branches button */
-		let branchesButton = this.createButton(d3.select(".branchesbar"), "Branches", this.sort, "branches");
+		/* Create sort buttons */
+		this.createButton(d3.select(".colorbar"), "Pixel", this.sort, "color");
+		this.createButton(d3.select(".timebar"), "Time", this.sort, "time");
+		this.createButton(d3.select(".branchesbar"), "Branches", this.sort, "branches");
+		this.createButton(d3.select(".samplesbar"), "Samples", this.sort, "samples");
+		this.createButton(d3.select(".depthbar"), "Depth", this.sort, "depth");
+		this.createButton(d3.select(".variancebar"), "Variance", this.sort, "variance");
+		this.createButton(d3.select(".boxIntersections"), "Box", this.sort, "boxIntersections");
+		this.createButton(d3.select(".objIntersections"), "Obj", this.sort, "objIntersections");
 		
-		/* Samples button */
-		let samplesButton = this.createButton(d3.select(".samplesbar"), "Samples", this.sort, "samples");
-		
-		/* Depth button */
-		let depthButton = this.createButton(d3.select(".depthbar"), "Depth", this.sort, "depth");
-
-		/* Variance button */
-		let varianceButton = this.createButton(d3.select(".variancebar"), "Variance", this.sort, "variance");
-		
-		/* Box Intersections button */
-		let boxIntersectionsButton = this.createButton(d3.select(".boxIntersections"), "Box", this.sort, "boxIntersections");
-		
-		/* Obj Intersections button */
-		let objIntersectionsButton = this.createButton(d3.select(".objIntersections"), "Obj", this.sort, "objIntersections");
+		/* Create move handles */
+		this.createMoveHandle(d3.select(".colorbar"));
+		this.createMoveHandle(d3.select(".timebar"));
+		this.createMoveHandle(d3.select(".branchesbar"));
+		this.createMoveHandle(d3.select(".samplesbar"));
+		this.createMoveHandle(d3.select(".depthbar"));
+		this.createMoveHandle(d3.select(".variancebar"));
+		this.createMoveHandle(d3.select(".boxIntersections"));
+		this.createMoveHandle(d3.select(".objIntersections"));
 	}
 
 	/* Updates a specific bar */
 	updateBar(data, field, svgGroup, totalBars) {
 		if (svgGroup.empty()) return;
 
-
 		let parentData = svgGroup.datum();
 		let index = parentData.idx; 
 
-		let heightScale = d3.scaleLinear().domain([0, 100]).range([this.height - this.barGroupHeight,this.height]);
+		let heightScale = d3.scaleLinear().domain([0, 100]).range([this.buttonMenuHeight, this.buttonMenuHeight + this.barGroupHeight]);
 		let widthScale = d3.scaleLinear().domain([0, 100])
 			.range([index * (this.barGroupWidth / totalBars), (index + 1) * (this.barGroupWidth / totalBars)]);
 		let dataLenInv = 1 / data.length; 
@@ -409,10 +476,11 @@ class ParallelBarView {
 		enterRects.style("stroke-width", 0);
 
 		let allRects = enterRects.merge(rects);
-		allRects.attr("y", (d, i) => {return heightScale((i * dataLenInv) * 100)})
+		rects
 			.attr("height", dataLenInv * this.barGroupHeight)
 			.attr("x", (d, i) => {return widthScale(0);})
-			.attr("width", this.barGroupWidth / totalBars);
+			.attr("width", this.barGroupWidth / totalBars)
+			.attr("y", (d, i) => {return heightScale((i * dataLenInv) * 100)});
 
 		return allRects;
 	}
@@ -480,7 +548,7 @@ class ParallelBarView {
 			the treeview and image view are also updated. */
 	updateSelectable(data, svgGroup) {
 		let self = this;
-		let heightScale = d3.scaleLinear().domain([0, 100]).range([this.height - this.barGroupHeight,this.height]);
+		let heightScale = d3.scaleLinear().domain([0, 100]).range([this.buttonMenuHeight, this.buttonMenuHeight + this.barGroupHeight]);
 		let widthScale = d3.scaleLinear().domain([0, 100]).range([0, this.barGroupWidth]);
 		let dataLenInv = 1 / data.length; 
         
@@ -504,9 +572,13 @@ class ParallelBarView {
 			.classed("active", (d,i) => { return (d.x == self.selectedx && d.y == self.selectedy);})
 			.on("mouseover", function(d,i) {
 				d3.select(this).classed("hover", true);
+				if (self.imageview != null)
+          			self.imageview.hoverPixel(d.x, d.y);
 			})
           	.on("mouseout", function(d,i) {
           		d3.select(this).classed("hover", false);
+          		if (self.imageview != null)
+          			self.imageview.hoverPixel(-1, -1);
           	})
           	.on("click", function(d,i) {
           		self.selectedx = d.x;
@@ -516,7 +588,7 @@ class ParallelBarView {
           		if (self.imageview != null)
           			self.imageview.selectPixel(d.x, d.y);
           		/* TODO: update tree view */
-          	})
+          	});
 
 		return allRects;
 	}
@@ -526,9 +598,9 @@ class ParallelBarView {
 		/* Update width and height just incase canvas size has changed */
 		this.width = $("#pixel-analysis-viewport svg").parent().width();
     	this.height = $("#pixel-analysis-viewport svg").parent().height();
-    	this.barGroupHeight = this.height * .9;
+    	this.barGroupHeight = this.height * .85;
     	this.barGroupWidth = this.width;
-    	this.buttonMenuHeight = this.height - this.barGroupHeight;
+    	this.buttonMenuHeight = this.height * .075;
     	this.buttonMenuWidth = this.width;
     	this.menuWidth = $("#pixel-analysis-menu").width();
     	this.menuHeight = $("#pixel-analysis-menu").height();
@@ -571,8 +643,15 @@ class ParallelBarView {
 		this.lastSort = "color";
 		this.data.sort(
             (x, y) => {
-	        	return this.rgbToHsv(x.color.red, x.color.green, x.color.blue)[0] 
-            		 - this.rgbToHsv(y.color.red, y.color.green, y.color.blue)[0];
+            	if (x.y - y.y < 0) return 1;
+            	else if (x.y - y.y > 0) return -1;
+            	else if (x.x - y.x < 0) return 1;
+            	else if (x.x - y.x > 0) return -1;
+            	else{
+            		return 0;
+            	} 
+	        	//return this.rgbToHsv(x.color.red, x.color.green, x.color.blue)[0] 
+            	//	 - this.rgbToHsv(y.color.red, y.color.green, y.color.blue)[0];
           }
         );
 

@@ -13,7 +13,7 @@ class ImageView {
     	this.menuHeight = $("#image-menu").height();
     	this.menuSVG.attr("width", this.menuWidth).attr("height", this.menuHeight);
 		this.checkpoint = 0;
-		this.maxCheckpoint = 5;
+		this.maxCheckpoint = 7;
 
 		// Create the viewport SVG
 		d3.select("#image-viewport").html("");
@@ -27,6 +27,9 @@ class ImageView {
     	this.imgHeight = 256; 
 		this.svg.attr("width", this.width).attr("height", this.height);
 		this.lastTransform = {"k":1,"x":0,"y":0};
+
+		this.hoveredLocation = [-1, -1];
+		this.selectedLocation = [-1, -1];
 	};
 
 	setDimensions(dimensions) {
@@ -56,25 +59,27 @@ class ImageView {
 		/* Add text for the current checkpoint */
 		let textGroup = svg.append("g").classed("textGroup", true);
 
+		let textData = this.getText(this.checkpoint);
+
 		textGroup.append("text")
-		.text(this.getCheckpointHeader(this.checkpoint))
+		.text(textData.header)
 		.classed("h", true).classed("unselectable", true)
 		.attr("text-anchor", "middle")
 		.attr("x", scaleWidth(50)).attr("y", scaleHeight(25));
 
 
 		textGroup.append("text")
-		.text(this.getCheckpointLine1(this.checkpoint))
+		.text(textData.l1)
 		.classed("p", true).classed("unselectable", true)
 		.attr("text-anchor", "middle")
 		.attr("x", scaleWidth(50)).attr("y", scaleHeight(50));
 		textGroup.append("text")
-		.text(this.getCheckpointLine2(this.checkpoint))
+		.text(textData.l2)
 		.classed("p", true).classed("unselectable", true)
 		.attr("text-anchor", "middle")
 		.attr("x", scaleWidth(50)).attr("y", scaleHeight(65));
 		textGroup.append("text")
-		.text(this.getCheckpointLine3(this.checkpoint))
+		.text(textData.l3)
 		.classed("p", true).classed("unselectable", true)
 		.attr("text-anchor", "middle")
 		.attr("x", scaleWidth(50)).attr("y", scaleHeight(80));
@@ -84,114 +89,93 @@ class ImageView {
 		svg.append("rect")
 		.classed("button", true)
 		.attr("id", "imageMenuBackButton")
-		.attr("x", scaleWidth(5)).attr("y", scaleHeight(30+buttonVertOffset))
+		.attr("x", scaleWidth(2)).attr("y", scaleHeight(30+buttonVertOffset))
 		.attr("width", scaleWidth(buttonWidth)).attr("height", scaleHeight(40))
 		.on("click", function() { if (self.checkpoint > 0) self.checkpoint--; self.update();});
 
 		svg.append("line")
 		.classed("unselectable", true)
-		.attr("x1", scaleWidth(5 + 3)).attr("y1", scaleHeight(35+buttonVertOffset))
-		.attr("x2", scaleWidth(5 + 2)).attr("y2", scaleHeight(50+buttonVertOffset))
+		.attr("x1", scaleWidth(2 + 3)).attr("y1", scaleHeight(35+buttonVertOffset))
+		.attr("x2", scaleWidth(2 + 2)).attr("y2", scaleHeight(50+buttonVertOffset))
 		.attr("stroke-width", 2).attr("stroke", "white");
 
 		svg.append("line")
 		.classed("unselectable", true)
-		.attr("x1", scaleWidth(5+2)).attr("y1", scaleHeight(50+buttonVertOffset))
-		.attr("x2", scaleWidth(5+3)).attr("y2", scaleHeight(65+buttonVertOffset))
+		.attr("x1", scaleWidth(2+2)).attr("y1", scaleHeight(50+buttonVertOffset))
+		.attr("x2", scaleWidth(2+3)).attr("y2", scaleHeight(65+buttonVertOffset))
 		.attr("stroke-width", 2).attr("stroke", "white");
 
 		svg.append("rect")
 		.attr("id", "imageMenuNextButton")
 		.classed("button", true)
 		.attr("fill", "red")
-		.attr("x", scaleWidth(95-buttonWidth)).attr("y", scaleHeight(30+buttonVertOffset))
+		.attr("x", scaleWidth(98-buttonWidth)).attr("y", scaleHeight(30+buttonVertOffset))
 		.attr("width", scaleWidth(buttonWidth)).attr("height", scaleHeight(40))
 		.on("click", function() { if (self.checkpoint < self.maxCheckpoint) self.checkpoint++; self.update();});
 
 		svg.append("line")
 		.classed("unselectable", true)
-		.attr("x1", scaleWidth(95-buttonWidth + 2)).attr("y1", scaleHeight(35+buttonVertOffset))
-		.attr("x2", scaleWidth(95-buttonWidth + 3)).attr("y2", scaleHeight(50+buttonVertOffset))
+		.attr("x1", scaleWidth(98-buttonWidth + 2)).attr("y1", scaleHeight(35+buttonVertOffset))
+		.attr("x2", scaleWidth(98-buttonWidth + 3)).attr("y2", scaleHeight(50+buttonVertOffset))
 		.attr("stroke-width", 2).attr("stroke", "white");
 
 		svg.append("line")
 		.classed("unselectable", true)
-		.attr("x1", scaleWidth(95-buttonWidth + 3)).attr("y1", scaleHeight(50+buttonVertOffset))
-		.attr("x2", scaleWidth(95-buttonWidth + 2)).attr("y2", scaleHeight(65+buttonVertOffset))
+		.attr("x1", scaleWidth(98-buttonWidth + 3)).attr("y1", scaleHeight(50+buttonVertOffset))
+		.attr("x2", scaleWidth(98-buttonWidth + 2)).attr("y2", scaleHeight(65+buttonVertOffset))
 		.attr("stroke-width", 2).attr("stroke", "white");
 	}
 
-	getCheckpointHeader(checkpoint) {
+	getText(checkpoint) {
 		switch(checkpoint) {
 		    case 0:
-		        return "Ray Tracing";
+		        return {"header": "Ray Tracing",
+		        "l1": "In computer graphics, ray tracing is a rendering technique which",
+		    	"l2": "generates images with a very high degree of visual realism. Unfortunately,",
+		    	"l3": " an image can take a long time to render, for a wide variety of reasons."
+		    };
 		    case 1:
-		        return "Renders Take a Long Time";
+		        return {"header": "Per Pixel Render Time",
+		        "l1": "Render time varies on a per pixel basis. This  ",
+		    	"l2": "variation can be difficult to parallelize, since per ",
+		    	"l3": "pixel parallelization can lead to load imbalancing."
+		    };
 		    case 2:
-		        return "Color Variance";
+		        return {"header": "Color Variance",
+		        "l1": "Color variance occurs when multiple objects, or detailed textures all",
+		    	"l2": "lie within the boundries of a pixel. This can cause aliasing, since ",
+		    	"l3": "one ray might lead to a poor estimation of a pixel's true color."
+		    };
 		    case 3:
-		        return "Ray Bouncing and Branching";
+		        return {"header": "Multisampling, and Antialiasing",
+		        "l1": "To smooth the pixel out, multiple rays are cast for",
+		    	"l2": "each pixel based on color variance. The more samples that",
+		    	"l3": "are cast, the higher the computation time for that pixel"
+		    };
 		    case 4:
-		        return "Ray Box Intersections";
+		        return {"header": "Reflections and Refractions",
+		        "l1": "To represent reflections and refractions, rays must reflect ",
+		    	"l2": "and refract off surfaces. This branching can also impact ",
+		    	"l3": "render time, since more computation is required."
+		    };
 		    case 5:
-		        return "Ray Triangle Intersections";
-		    default:
-		        return "";
-		}
-	}
-
-	getCheckpointLine1(checkpoint) {
-		switch(checkpoint) {
-		    case 0:
-		        return "In computer graphics, ray tracing is a rendering technique generating";
-		    case 1:
-		        return "The technique is capable of producing a very ";
-		    case 2:
-		        return "Color variance greatly effects computational cost.";
-		    case 3:
-		        return "To represent reflections and refractions, rays must ";
-		    case 4:
-		        return "As each ray is cast, it must test for intersection with boxes ";
-		    case 5:
-		        return "Some boxes in that BVH contain triangles. ";
-		    default:
-		        return "";
-		}
-	}
-
-	getCheckpointLine2(checkpoint) {
-		switch(checkpoint) {
-		    case 0:
-		        return "an image by tracing the path of light as pixels in an image plane and";
-		    case 1:
-		        return "high degree of visual realism, but at a greater cost.";
-		    case 2:
-		        return "To get a smooth edges, when variance is high, more ";
-		    case 3:
-		        return "reflect and refract off surfaces. This branching ";
-		    case 4:
-		        return "in a bounding volume hierarchy. This greatly improves ";
-		    case 5:
-		        return "When a ray hits a box containing triangles, it must test for ";
-		    default:
-		        return "";
-		}
-	}
-	
-	getCheckpointLine3(checkpoint) {
-		switch(checkpoint) {
-		    case 0:
-		        return "simulating the effects of its encounters with virtual objects.";
-		    case 1:
-		        return "(here, value encodes time to render)";
-		    case 2:
-		        return "rays must be cast from a particular pixel. ";
-		    case 3:
-		        return "can also impact render time. ";
-		    case 4:
-		        return "ray mesh intersection times, but isn't free.";
-		    case 5:
-		        return "intersections with those triangles. ";
+		        return {"header": "Bounding Volume Hierarchies",
+		        "l1": "When a ray is cast, it has to test for intersections with a",
+		    	"l2": "large number of triangles. To improve performance, bounding volume",
+		    	"l3": "hierarchies are used to avoid triangle intersections."
+		    };
+		    case 6:
+		        return {"header": "Ray Triangle Intersections",
+		        "l1": "Eventually, some rays must test for intersection with a couple triangles. ",
+		    	"l2": "Triangle intersections can also be quite expensive.",
+		    	"l3": "Rays intersect more triangles on the edge of a mesh than in the center."
+		    };
+		    case 7:
+		        return {"header": "What's next...",
+		        "l1": "Research is being conducted here at the U to improve ray tracing ",
+		    	"l2": "times as well as power consumption. Hopefully, in a couple  ",
+		    	"l3": "years we'll be able to achieve real time interactive ray tracing."
+		    };
 		    default:
 		        return "";
 		}
@@ -202,9 +186,11 @@ class ImageView {
 			case 0: return "./Data/" + this.dimensions[0] + "/render.png";
 			case 1: return "./Data/" + this.dimensions[0] + "/renderTime.png";
 			case 2: return "./Data/" + this.dimensions[0] + "/variance.png";
-			case 3: return "./Data/" + this.dimensions[0] + "/secondaryRays.png";
-			case 4: return "./Data/" + this.dimensions[0] + "/boxIntersections.png";
-			case 5: return "./Data/" + this.dimensions[0] + "/objIntersections.png";
+			case 3: return "./Data/" + this.dimensions[0] + "/sampleCount.png";
+			case 4: return "./Data/" + this.dimensions[0] + "/secondaryRays.png";
+			case 5: return "./Data/" + this.dimensions[0] + "/boxIntersections.png";
+			case 6: return "./Data/" + this.dimensions[0] + "/objIntersections.png";
+			case 7: return "./Data/" + this.dimensions[0] + "/highRes.png";
 			default: return "./Data/" + this.dimensions[0] + "/render.png"
 		}
 	}
@@ -246,7 +232,25 @@ class ImageView {
 		/* Add the image to the transformable group */
 		this.image = group.append("image");
 		this.image.attr("xlink:href", this.getImageLocation(this.checkpoint));
-		this.image.attr("height", this.height).attr("width", this.width);
+		this.image.attr("height", this.height).attr("width", this.height);
+
+		/* Small square to show selected pixel*/
+		let xScale = d3.scaleLinear().domain([0, this.dimensions[0]]).range([0, this.height]);
+		let yScale = d3.scaleLinear().domain([0, this.dimensions[0]]).range([0, this.height]);
+
+		group.append("rect")
+			.attr("class", "selectedPixel")
+			.attr("width", this.width / this.dimensions[0])
+			.attr("height", this.width / this.dimensions[1])
+			.attr("x", xScale(this.selectedLocation[0]))
+			.attr("y", yScale(this.selectedLocation[1]));
+
+		group.append("rect")
+			.attr("class", "hoveredPixel")
+			.attr("width", this.width / this.dimensions[0])
+			.attr("height", this.width / this.dimensions[1])
+			.attr("x", xScale(this.hoveredLocation[0]))
+			.attr("y", yScale(this.hoveredLocation[1]));
 		
 		/* Add a small square to show the brush region. */
 		svg.append("rect")
@@ -277,7 +281,34 @@ class ImageView {
 	}
 
 	selectPixel(x, y) {
-		console.log("TODO: select pixel " + x + " " + y + " in the image view. ");
+		
+		/* Small square to show selected pixel*/
+		let xScale = d3.scaleLinear().domain([0, this.dimensions[0]]).range([0, this.height]);
+		let yScale = d3.scaleLinear().domain([0, this.dimensions[0]]).range([0, this.height]);
+		this.selectedLocation[0] = x;
+		this.selectedLocation[1] = y;
+
+		d3.select(".selectedPixel")
+			.attr("width", this.width / this.dimensions[0])
+			.attr("height", this.width / this.dimensions[1])
+			.attr("x", xScale(x))
+			.attr("y", yScale(y));
+
+	}
+
+	hoverPixel(x, y) {
+		/* Small square to show selected pixel*/
+		let xScale = d3.scaleLinear().domain([0, this.dimensions[0]]).range([0, this.height]);
+		let yScale = d3.scaleLinear().domain([0, this.dimensions[0]]).range([0, this.height]);
+		this.hoveredLocation[0] = x;
+		this.hoveredLocation[1] = y;
+
+		d3.select(".hoveredPixel")
+			.attr("width", this.width / this.dimensions[0])
+			.attr("height", this.width / this.dimensions[1])
+			.attr("x", xScale(x))
+			.attr("y", yScale(y));
+
 	}
 
 	resize() {
