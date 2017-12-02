@@ -1,0 +1,18 @@
+.treePixel {
+	stroke: white;
+	stroke-width: 2px;
+
+}
+
+circle {
+    stroke: #05668D;
+    fill: white;
+    opacity: 0.6;
+    stroke-width: 2px;
+}
+path {
+    fill: none;
+    stroke: #05668D;
+    opacity: 0.6;
+    stroke-width: 2px;
+}

@@ -5,158 +5,110 @@
 
 class RayTreeView {
 	constructor(){
-		this.treeDiv = d3.select("#tree-view");
-		this.svg = this.treeDiv.append("svg");
-		this.width = $("#tree-view").width();
-		this.height = $("#tree-view").height();
-		this.svg.attr("width", this.width)
-				.attr("height", this.height);
-		//create a group in the svg for easy transformation
-		this.svg.append("g").attr("id", "tree");
+		this.treeDiv = d3.select("#pixel-analysis-viewport");
+		this.svg = this.treeDiv.select("svg");
+		this.width = $("#pixel-analysis-viewport").width();
+    	this.height = $("#pixel-analysis-viewport").height();
+    	this.svg.attr("width", this.width).attr("height", this.height);
+
+    	this.hidden = true;
 	};
 	
 	update(_sampleIdx){
-		//clear the svg
-		this.svg.selectAll("g#tree > g.node").remove();
-		this.svg.selectAll("g#tree > path.link").remove();
+		if (this.hidden) return;
+		if (this.data == null) {
+			this.svg.selectAll("text").remove();
 
-		/* concept art TEMPORARY */
-		this.svg.selectAll("image").remove();
-		this.image = this.svg.append("image");
-		this.image.attr("xlink:href", "./Sketches/Vis4DataSci1tree.png");
-		this.image.attr("height", this.height).attr("width", this.width);
-		
-		//if _sampleIdx is undefined
-		if(_sampleIdx === undefined){
-			//set it to -1
-			_sampleIdx = -1;
-		}
-		//if _sampleIdx is -1
-		if(_sampleIdx == -1){
-			//we'll just leave it cleared
+			this.svg.append("text")
+				.text("Select a pixel to see it's samples here.")
+				.classed("h", true)
+				.attr("text-anchor", "middle")
+				.attr("x", this.width / 2.0)
+				.attr("y", this.height / 2.0);
 			return;
-		}
-		
-		//extract the data for _sampleIdx
-		let treeMap = d3.tree().size([this.width,this.height]);
-		
-		/*let root = d3.stratify()
-			.id(function(d, i){
-				return i;
-			})
-			.parentId(function(d){
-				return 
-			})*/
-		//root = d3.hierarchy(treeData, function(d) { return d.children; });
-		let root = d3.hierarchy(this.data[_sampleIdx][0], function(d){
-			return d.children;
-		});
-		
-		let theTreeData = treeMap(root);
-		let nodes = theTreeData.descendants(),
-			links = theTreeData.descendants().slice(1);
-			
-		
-		//draw the tree
-		this.node = d3.select("g#tree").selectAll("g.node")
-			.data(nodes);
-		let nodeEnter = this.node.enter().append('g')
-			.attr('class', 'node')
-			.attr('transform', function(d){
-				return `translate(${d.y}, ${d.x})`;
-			});
-		nodeEnter.append('circle')
-			.attr('class', 'node')
-			.attr('r', 6);
-		this.node = this.node.merge(nodeEnter);
-		
-		this.link = d3.select('g#tree').selectAll('path.link')
-			.data(links);
-		let linkEnter = this.link.enter().insert('path', 'g')
-			.attr('class', 'link')
-			.attr('d', function(d){
-				return diagonal(d, d.parent);
-			})
-			.attr("fill", "transparent")
-			.attr("stroke", "white");
-		this.link = this.link.merge(linkEnter);
-		
-		function diagonal(s, d){
-			return `M ${s.y} ${s.x}
-					C ${(s.y + d.y) / 2} ${s.x},
-					  ${(s.y + d.y) / 2} ${d.x},
-					  ${d.y} ${d.x}`;
-		}
+		} 
+
+		var vWidth = this.width;
+    	var vHeight = this.height;
+    	
+    	// Prepare our physical space
+    	var g = this.svg.append('g').attr('transform', 'translate(' + vWidth/2 + ',' + vHeight/2 + ')');
+
+
+		// Declare d3 layout
+        var vLayout = d3.tree().size([2 * Math.PI, Math.min(vWidth, vHeight)/2 - 30]); // margin!
+
+		// Layout + Data
+        var vRoot = d3.hierarchy(this.data, function(d) {
+        		if (!d.ch && d.length != 0) return d; 
+        		if (d.ch.length == 0) return null;
+        		return d.ch;
+        	});
+        var vNodes = vRoot.descendants();
+        var vLinks = vLayout(vRoot).links();
+
+        // Draw on screen
+
+		var link = g.selectAll(".link")
+		    .data(vLinks)
+		    .enter().append("line")
+		      .attr("class", "link")
+		      .attr("stroke","#ccc")
+		      .attr("x1", function(d) { return d3.pointRadial(d.source.x,d.source.y)[0]; })
+		      .attr("y1", function(d) { return d3.pointRadial(d.source.x,d.source.y)[1]; })
+		      .attr("x2", function(d) { return d3.pointRadial(d.target.x,d.target.y)[0]; })
+		      .attr("y2", function(d) { return d3.pointRadial(d.target.x,d.target.y)[1]; }) ;
+
+		let rectSize = 15;
+
+        g.selectAll('rect').data(vNodes).enter().append('rect')
+        	.classed("treePixel", true)
+            .attr('x', (d) => {return d3.pointRadial(d.x, d.y)[0] - rectSize/2;} ).attr("y", (d) => {return d3.pointRadial(d.x, d.y)[1] - rectSize/2;})
+            .attr('width', rectSize).attr("height", rectSize)
+            .attr("fill", (d)=>{ 
+            	console.log(d); 
+            	if (d.data.c) 
+            		return d3.rgb(d.data.c[0]*255, d.data.c[1]*255, d.data.c[2]*255); 
+            	else return "";
+            });
+
+            //.attr("transform", function (d) { return "translate(" + d3.pointRadial(d.x, d.y) + ")"; });
+
+		// /* concept art TEMPORARY */
+		// this.svg.selectAll("image").remove();
+		// this.image = this.svg.append("image");
+		// this.image.attr("xlink:href", "./Sketches/Vis4DataSci1tree.png");
+		// this.image.attr("height", this.height).attr("width", this.width);
 	}
 	
 	resize(){
 		//get the width and height of the div and copy those to the svg
-		let bounds = this.treeDiv.node().getBoundingClientRect();
-		this.width = bounds.width;
-		this.height = bounds.height;
-		this.svg.attr("width", this.width)
+		this.width = $("#pixel-analysis-viewport svg").parent().width();
+    	this.height = $("#pixel-analysis-viewport svg").parent().height();
+
+    	this.svg.attr("width", this.width)
 				.attr("height", this.height);
+
+		this.svg.selectAll("g").remove();
 		
 		this.update();
 	}
 	
-	setData(_data){
-		this.rawData = _data;
-		//wrangle the data into a format that D3 trees understand
-		/*
-		The format should look something like this:
-		{
-			"name":"theName",
-			"children":[
-				{
-					"name":"the first child",
-					"children":[]
-				},
-				{
-					"name":"the second child",
-					"children":[]
-				}
-			]
-		}
-		*/
-		
-		this.data = [];
-		//for each pixel
-		for(let i = 0; i < this.rawData.length; i++){
-			let pixelData = this.rawData[i];
-			//for each sample
-			let pixel = [];
-			for(let s = 0; s < pixelData.length; s++){
-				pixel.push(r_processData(pixelData[s]));
+	selectPixel(x, y){
+		let self = this;
+		/* For now, assume the image is 128 by 128, and 512 pixels per file in row major */
+		let pixelIdx = x + y * 128;
+		let fileIdx = Math.floor(pixelIdx / 512);
+		let dataIdx = pixelIdx % 512;
+
+		d3.json("./Data/128/raydata/raydata" + fileIdx + ".json", function(error, data) {
+			if (!error) {
+				self.data = data.RayData[dataIdx];
+				self.update();
+			} else {
+				console.log(error);
 			}
-			this.data.push(pixel);
-		}
-		
-		var rayTypes = [
-			'camera',
-			'reflection',
-			'refraction',
-			'shadow'
-		];
-		function r_processData(rawNode){
-			let newNode = {};
-			//add "name" to newNode
-			newNode.name = "TODO";
-			//add node data
-			//TODO
-			//add link data
-			newNode.rayType = +rawNode['t'];
-			//add "children"[] to newNode
-			newNode.children = [];
-			//for each object in rawNode["ch"]
-			for(let i = 0; i < rawNode['ch'].length; i++){
-				//call r_processData on the rawNode's child
-				//add the returned object to "children"
-				newNode.children.push(r_processData(rawNode['ch'][i]));
-			}
-			//return newNode
-			return newNode;
-		}
+		});
 	}
 }
 

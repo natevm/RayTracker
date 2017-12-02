@@ -1,46 +1,32 @@
 <html>
 	<header>
-		<title>This is title</title>
+		<title>Ray Tracker - CS6630 - Nathan Morrical</title>
 		<link rel="stylesheet" href="./Styles/flexbox.css">
-		<link rel="stylesheet" href="./Styles/viewport.css">
 		<link rel="stylesheet" href="./Styles/fonts.css">
 		<link rel="stylesheet" href="./Styles/colors.css">
+		<link rel="stylesheet" href="./Styles/ImageView.css">
+		<link rel="stylesheet" href="./Styles/RayTreeView.css">
+		<link rel="stylesheet" href="./Styles/ParallelBarView.css">
 		<meta name="viewport" content="width=device-width,initial-scale=1.0">
 	</header>
 	<body id="main-container">
 		<div id="sidebar">
-			<div id="help-toggle">
-				<p class="unselectable">
-				?
-				</p>
+			<div id="story-toggle" class="button toggled">
+				<p class="sidebar-item unselectable">Story Mode</p>
 			</div>
-			<div id="pixel-view-toggle">
-				<p class="rotate unselectable"> 
-					Story Mode
-				</p>
-			</div>
-			<div id="three-d-view-toggle">
-				<p class="rotate unselectable">
-					Explore mode
-				</p>
+			<div id="explore-toggle" class="button">
+				<p class="sidebar-item unselectable">Explore mode</p>
 			</div>
 		</div>
-		<!-- was viewport-column -->
+
 		<div id="image-column">
-			<!-- was viewport-options -->
 			<div id="image-menu">Image menu</div>
-			<!-- was viewport -->
-			<div id="image-viewport">
-				Image viewport
-			</div>
+			<div id="image-viewport">Image viewport</div>
 		</div>
+
 		<div id="pixel-analysis-column">
 			<div id="pixel-analysis-menu">Pixel analysis menu</div>
-			<!-- was bar-chart -->
-			<div id="pixel-analysis-viewport">
-				Pixel analysis viewport
-			</div>
-			<!-- <div id="tree-view"></div> -->
+			<div id="pixel-analysis-viewport">Pixel analysis viewport</div>
 		</div>
 	</body>
 </html>
@@ -53,4 +39,5 @@
 <script src="./Scripts/ImageView.js"></script>
 <script src="./Scripts/RayTreeView.js"></script>
 <script src="./Scripts/ParallelBarView.js"></script>
+<script src="./Scripts/PixelAnalysisView.js"></script>
 <script src="./Scripts/main.js"></script>

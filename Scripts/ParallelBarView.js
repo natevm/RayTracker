@@ -6,9 +6,8 @@
 class ParallelBarView {
 	constructor() {
 		/* Create viewport */		
-		d3.select("#pixel-analysis-viewport").html("");
 		this.barchartDiv = d3.select("#pixel-analysis-viewport");
-		this.svg = this.barchartDiv.append("svg");
+		this.svg = this.barchartDiv.select("svg");
 		this.width = $("#pixel-analysis-viewport").width();
     	this.height = $("#pixel-analysis-viewport").height();
     	this.barGroupHeight = this.height * .85;
@@ -26,21 +25,11 @@ class ParallelBarView {
 		this.varianceAsc = false;
 		this.boxIntersectionsAsc = false;
 		this.objIntersectionsAsc = false;
-
-		/* Create menu */
-		d3.select("#pixel-analysis-menu").html("");
-		this.menuDiv = d3.select("#pixel-analysis-menu");
-		this.menuSVG =  this.menuDiv.append("svg");
-		this.menuWidth = $("#pixel-analysis-menu").width();
-    	this.menuHeight = $("#pixel-analysis-menu").height();
-		this.menuSVG.attr("width", this.menuWidth)
-						.attr("height", this.menuHeight);
-
-		this.checkpoint = 0;
-		this.maxCheckpoint = 1;
+		this.hidden = false;
 
 		this.createGroups();
 	};
+
 
 	/* Group drag events */
 	dragstarted(d) { d3.select(this).raise().classed("active", true); }
@@ -125,7 +114,7 @@ class ParallelBarView {
 
 
 		this.svg.append("g").classed("selectableBar overlay", true);
-		this.update();
+		//this.update();
 	}
 
 	/* Alters bounds to be within the image */
@@ -142,139 +131,10 @@ class ParallelBarView {
 	}
 
 	update() {
-		this.updateMenu();
+		if (this.hidden) return;
 		if (this.data) {
-			//this.createGroups();
 			this.updateButtonMenu();
 			this.updateBars(this.data);
-			//this.sort(this.lastSort);
-		}
-	}
-
-
-	updateMenu() 
-	{
-		let buttonVertOffset = 10;
-		let buttonWidth = 5;
-
-
-		let self = this;
-		let svg = this.menuSVG;
-		let scaleHeight = d3.scaleLinear().domain([0,100]).range([0, this.menuHeight]);
-		let scaleWidth = d3.scaleLinear().domain([0,100]).range([0, this.menuWidth]);
-
-		/* Clear the menu */
-		svg.selectAll("*").remove();
-
-		/* Add text for the current checkpoint */
-		let textGroup = svg.append("g").classed("textGroup", true);
-
-		textGroup.append("text")
-		.text(this.getCheckpointHeader(this.checkpoint))
-		.classed("h", true).classed("unselectable", true)
-		.attr("text-anchor", "middle")
-		.attr("x", scaleWidth(50)).attr("y", scaleHeight(25));
-
-
-		textGroup.append("text")
-		.text(this.getCheckpointLine1(this.checkpoint))
-		.classed("p", true).classed("unselectable", true)
-		.attr("text-anchor", "middle")
-		.attr("x", scaleWidth(50)).attr("y", scaleHeight(50));
-		textGroup.append("text")
-		.text(this.getCheckpointLine2(this.checkpoint))
-		.classed("p", true).classed("unselectable", true)
-		.attr("text-anchor", "middle")
-		.attr("x", scaleWidth(50)).attr("y", scaleHeight(65));
-		textGroup.append("text")
-		.text(this.getCheckpointLine3(this.checkpoint))
-		.classed("p", true).classed("unselectable", true)
-		.attr("text-anchor", "middle")
-		.attr("x", scaleWidth(50)).attr("y", scaleHeight(80));
-
-
-		/* Add next/previous buttons */
-		svg.append("rect")
-		.classed("button", true)
-		.attr("id", "imageMenuBackButton")
-		.attr("x", scaleWidth(5)).attr("y", scaleHeight(30+buttonVertOffset))
-		.attr("width", scaleWidth(buttonWidth)).attr("height", scaleHeight(40))
-		.on("click", function() { if (self.checkpoint > 0) self.checkpoint--; self.update();});
-
-		svg.append("line")
-		.classed("unselectable", true)
-		.attr("x1", scaleWidth(5 + 3)).attr("y1", scaleHeight(35+buttonVertOffset))
-		.attr("x2", scaleWidth(5 + 2)).attr("y2", scaleHeight(50+buttonVertOffset))
-		.attr("stroke-width", 2).attr("stroke", "white");
-
-		svg.append("line")
-		.classed("unselectable", true)
-		.attr("x1", scaleWidth(5+2)).attr("y1", scaleHeight(50+buttonVertOffset))
-		.attr("x2", scaleWidth(5+3)).attr("y2", scaleHeight(65+buttonVertOffset))
-		.attr("stroke-width", 2).attr("stroke", "white");
-
-		svg.append("rect")
-		.attr("id", "imageMenuNextButton")
-		.classed("button", true)
-		.attr("fill", "red")
-		.attr("x", scaleWidth(95-buttonWidth)).attr("y", scaleHeight(30+buttonVertOffset))
-		.attr("width", scaleWidth(buttonWidth)).attr("height", scaleHeight(40))
-		.on("click", function() { if (self.checkpoint < self.maxCheckpoint) self.checkpoint++; self.update();});
-
-		svg.append("line")
-		.classed("unselectable", true)
-		.attr("x1", scaleWidth(95-buttonWidth + 2)).attr("y1", scaleHeight(35+buttonVertOffset))
-		.attr("x2", scaleWidth(95-buttonWidth + 3)).attr("y2", scaleHeight(50+buttonVertOffset))
-		.attr("stroke-width", 2).attr("stroke", "white");
-
-		svg.append("line")
-		.classed("unselectable", true)
-		.attr("x1", scaleWidth(95-buttonWidth + 3)).attr("y1", scaleHeight(50+buttonVertOffset))
-		.attr("x2", scaleWidth(95-buttonWidth + 2)).attr("y2", scaleHeight(65+buttonVertOffset))
-		.attr("stroke-width", 2).attr("stroke", "white");
-	}
-
-	getCheckpointHeader(checkpoint) {
-		switch(checkpoint) {
-		    case 0:
-		        return "Correlation with Time";
-		    case 1:
-		        return "Why some rays take a long time";
-		    default:
-		        return "";
-		}
-	}
-
-	getCheckpointLine1(checkpoint) {
-		switch(checkpoint) {
-		    case 0:
-		        return "There is a correlation between these. ";
-		    case 1:
-		        return "Digging deeper into ray data ";
-		    default:
-		        return "";
-		}
-	}
-
-	getCheckpointLine2(checkpoint) {
-		switch(checkpoint) {
-		    case 0:
-		        return "";
-		    case 1:
-		        return "";
-		    default:
-		        return "";
-		}
-	}
-	
-	getCheckpointLine3(checkpoint) {
-		switch(checkpoint) {
-		    case 0:
-		        return "";
-		    case 1:
-		        return "";
-		    default:
-		        return "";
 		}
 	}
 
@@ -285,7 +145,7 @@ class ParallelBarView {
 		this.sanitizeBounds(bounds, this.rawData.dimensions);
 		
 		let skip = 0;
-		if (bounds[2] - bounds[0] > 16) skip = 2; // Helps keep the total bars under control
+		if (bounds[2] - bounds[0] > 8) skip = 2; // Helps keep the total bars under control
 
 		let self = this;
 		let svg = this.svg;
@@ -346,7 +206,7 @@ class ParallelBarView {
 		group.append("rect")
 			.attr("x", (widthScale(index * invWidth * 100) + horizontalPad))
 			.attr("y", heightScale(0) + verticalPad)
-			.attr("width", (this.menuWidth * invWidth) - (2.0 * horizontalPad)) 
+			.attr("width", (this.buttonMenuWidth * invWidth) - (2.0 * horizontalPad)) 
 			.attr("height", heightScale(100) - (2.0 * verticalPad))
 			.attr("class", "button")
 			.classed("button", true);
@@ -377,7 +237,7 @@ class ParallelBarView {
 
 		let x = (widthScale(index * invWidth * 100) + horizontalPad);
 		let y = (yScale(0) + verticalPad);
-		let btnWidth = (this.menuWidth * invWidth) - (2.0 * horizontalPad);
+		let btnWidth = (this.buttonMenuWidth * invWidth) - (2.0 * horizontalPad);
 		let btnHeight = heightScale(100) - (2.0 * verticalPad);
 
 		let group = svgGroup.append("g");
@@ -476,7 +336,7 @@ class ParallelBarView {
 		enterRects.style("stroke-width", 0);
 
 		let allRects = enterRects.merge(rects);
-		rects
+		allRects
 			.attr("height", dataLenInv * this.barGroupHeight)
 			.attr("x", (d, i) => {return widthScale(0);})
 			.attr("width", this.barGroupWidth / totalBars)
@@ -578,7 +438,7 @@ class ParallelBarView {
           	.on("mouseout", function(d,i) {
           		d3.select(this).classed("hover", false);
           		if (self.imageview != null)
-          			self.imageview.hoverPixel(-1, -1);
+          			self.imageview.hoverPixel(-1000, -1000);
           	})
           	.on("click", function(d,i) {
           		self.selectedx = d.x;
@@ -587,6 +447,9 @@ class ParallelBarView {
           		d3.select(this).classed("active", true);
           		if (self.imageview != null)
           			self.imageview.selectPixel(d.x, d.y);
+          		if (self.raytreeview != null)
+					self.raytreeview.selectPixel(d.x, d.y);
+
           		/* TODO: update tree view */
           	});
 
@@ -602,11 +465,7 @@ class ParallelBarView {
     	this.barGroupWidth = this.width;
     	this.buttonMenuHeight = this.height * .075;
     	this.buttonMenuWidth = this.width;
-    	this.menuWidth = $("#pixel-analysis-menu").width();
-    	this.menuHeight = $("#pixel-analysis-menu").height();
 		this.svg.attr("width", this.width).attr("height", this.height);
-		this.menuSVG.attr("width", this.menuWidth)
-						.attr("height", this.menuHeight);
 		this.createGroups();
 
 		this.update()
@@ -673,8 +532,6 @@ class ParallelBarView {
           }
         );
 
-		console.log(field);
-
         if (!this[field + "Asc"]) this.data.reverse();
 
         this.updateBars(this.data);
@@ -683,5 +540,9 @@ class ParallelBarView {
 	/* This could probably be designed a little cleaner... */
 	setImageView(imageview) {
 		this.imageview = imageview;
+	}
+
+	setRayTreeView(raytreeview){
+		this.raytreeview = raytreeview;
 	}
 }

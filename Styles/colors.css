@@ -7,17 +7,21 @@
 	--transparent2: rgba(0,0,0,.2);
 	--offWhite: rgba(255, 255, 255, 0.75);
 	--pink: #e44c65;
-	--transparentPink1: rgba(228, 76, 101, .5);
+	/*--transparentPink1: rgba(228, 76, 101, .5);
 	--transparentPink2: rgba(228, 76, 101, 1.0);
-	--transparentPink3: rgba(228, 76, 101, .75);
+	--transparentPink3: rgba(228, 76, 101, .75);*/
+
+	--transparentPink1: rgba(128, 0, 0, .5);
+	--transparentPink2: rgba(128, 0, 0, 1.0);
+	--transparentPink3: rgba(128, 0, 0, .75);
 }
 
 body {
 	background-color: var(--main-bg-color);
 }
 
-#help-toggle, #image-menu, #image-viewport, #pixel-view-toggle, 
-#three-d-view-toggle, #pixel-analysis-menu, 
+#image-menu, #image-viewport, 
+#pixel-analysis-menu, 
 #pixel-analysis-viewport {
 	background-color: var(--transparent-color1);
 	/*box-shadow: 0 0 0.25em 0 rgba(0, 0, 0, 0.25);*/
@@ -43,7 +47,10 @@ body {
 	rx: 2;
 	ry: 2;
     fill: var(--transparentPink1);*/
-
+	background-color: var(--transparent-color1);
+    border-width: .1vw;
+	border-style: solid;
+    border-color: rgba(255,255,255,230);
 
     transition-duration: 0.2s;
 	/*fill: none;*/
@@ -60,12 +67,22 @@ body {
 }
 
 .button:hover {
+	background-color: var(--transparentPink2);
+
     fill: var(--transparentPink2);
     fill-opacity:1.0;
 }
 
 .button:active {
+	background-color: var(--transparentPink3);
     fill: var(--transparentPink3);
+    fill-opacity:1.0;
+}
+
+.button.toggled{
+	background-color: var(--transparentPink2);
+	fill: var(--transparentPink2);
+    fill-opacity:1.0;
 }
 
 .button-overlay {
@@ -79,23 +96,4 @@ body {
 	user-select: none; /* Standard */
 
 	fill: white;
-}
-
-.row-overlay {
-	fill:var(--transparent);
-	stroke-width: 3px;
-	stroke: rgb(0,0,0);
-	/*transition-duration: 0.2s;*/
-}
-
-.row-overlay.hover {
-	fill: rgba(0, 255, 0, .2);
-}
-
-.row-overlay.active {
-	fill: rgba(0, 255, 0, .4);
-}
-
-.bargroup{
-	/*transition-duration: 0.2s;*/
 }

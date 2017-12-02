@@ -4,7 +4,7 @@
 	and brushing pixels for analysis.
 */
 class ImageView {
-	constructor(parallelBarView) {
+	constructor() {
 		// Create the menu
 		d3.select("#image-menu").html("");
 		this.menuDiv = d3.select("#image-menu");
@@ -17,8 +17,6 @@ class ImageView {
 
 		// Create the viewport SVG
 		d3.select("#image-viewport").html("");
-		this.parallelBarView = parallelBarView;
-		this.parallelBarView.setImageView(this);
 		this.viewportDiv = d3.select("#image-viewport");
 		this.svg = this.viewportDiv.append("svg");
 		this.width = $("#image-viewport").width();
@@ -28,9 +26,15 @@ class ImageView {
 		this.svg.attr("width", this.width).attr("height", this.height);
 		this.lastTransform = {"k":1,"x":0,"y":0};
 
-		this.hoveredLocation = [-1, -1];
-		this.selectedLocation = [-1, -1];
+		this.hoveredLocation = [-1000, -1000];
+		this.selectedLocation = [-1000, -1000];
+
+		this.mode = 0;
 	};
+
+	setParallelBarView(parallelBarView) {
+		this.parallelBarView = parallelBarView;
+	}
 
 	setDimensions(dimensions) {
 		this.dimensions = dimensions;
@@ -47,7 +51,6 @@ class ImageView {
 		let buttonVertOffset = 10;
 		let buttonWidth = 5;
 
-
 		let self = this;
 		let svg = this.menuSVG;
 		let scaleHeight = d3.scaleLinear().domain([0,100]).range([0, this.menuHeight]);
@@ -56,74 +59,114 @@ class ImageView {
 		/* Clear the menu */
 		svg.selectAll("*").remove();
 
-		/* Add text for the current checkpoint */
-		let textGroup = svg.append("g").classed("textGroup", true);
+		if (this.mode == 0) {
+			/* Add text for the current checkpoint */
+			let textGroup = svg.append("g").classed("textGroup", true);
 
-		let textData = this.getText(this.checkpoint);
+			let textData = this.getText(this.checkpoint);
 
-		textGroup.append("text")
-		.text(textData.header)
-		.classed("h", true).classed("unselectable", true)
-		.attr("text-anchor", "middle")
-		.attr("x", scaleWidth(50)).attr("y", scaleHeight(25));
-
-
-		textGroup.append("text")
-		.text(textData.l1)
-		.classed("p", true).classed("unselectable", true)
-		.attr("text-anchor", "middle")
-		.attr("x", scaleWidth(50)).attr("y", scaleHeight(50));
-		textGroup.append("text")
-		.text(textData.l2)
-		.classed("p", true).classed("unselectable", true)
-		.attr("text-anchor", "middle")
-		.attr("x", scaleWidth(50)).attr("y", scaleHeight(65));
-		textGroup.append("text")
-		.text(textData.l3)
-		.classed("p", true).classed("unselectable", true)
-		.attr("text-anchor", "middle")
-		.attr("x", scaleWidth(50)).attr("y", scaleHeight(80));
+			textGroup.append("text")
+			.text(textData.header)
+			.classed("h", true).classed("unselectable", true)
+			.attr("text-anchor", "middle")
+			.attr("x", scaleWidth(50)).attr("y", scaleHeight(25));
 
 
-		/* Add next/previous buttons */
-		svg.append("rect")
-		.classed("button", true)
-		.attr("id", "imageMenuBackButton")
-		.attr("x", scaleWidth(2)).attr("y", scaleHeight(30+buttonVertOffset))
-		.attr("width", scaleWidth(buttonWidth)).attr("height", scaleHeight(40))
-		.on("click", function() { if (self.checkpoint > 0) self.checkpoint--; self.update();});
+			textGroup.append("text")
+			.text(textData.l1)
+			.classed("p", true).classed("unselectable", true)
+			.attr("text-anchor", "middle")
+			.attr("x", scaleWidth(50)).attr("y", scaleHeight(50));
+			textGroup.append("text")
+			.text(textData.l2)
+			.classed("p", true).classed("unselectable", true)
+			.attr("text-anchor", "middle")
+			.attr("x", scaleWidth(50)).attr("y", scaleHeight(65));
+			textGroup.append("text")
+			.text(textData.l3)
+			.classed("p", true).classed("unselectable", true)
+			.attr("text-anchor", "middle")
+			.attr("x", scaleWidth(50)).attr("y", scaleHeight(80));
 
-		svg.append("line")
-		.classed("unselectable", true)
-		.attr("x1", scaleWidth(2 + 3)).attr("y1", scaleHeight(35+buttonVertOffset))
-		.attr("x2", scaleWidth(2 + 2)).attr("y2", scaleHeight(50+buttonVertOffset))
-		.attr("stroke-width", 2).attr("stroke", "white");
 
-		svg.append("line")
-		.classed("unselectable", true)
-		.attr("x1", scaleWidth(2+2)).attr("y1", scaleHeight(50+buttonVertOffset))
-		.attr("x2", scaleWidth(2+3)).attr("y2", scaleHeight(65+buttonVertOffset))
-		.attr("stroke-width", 2).attr("stroke", "white");
+			/* Add next/previous buttons */
+			svg.append("rect")
+			.classed("button", true)
+			.attr("id", "imageMenuBackButton")
+			.attr("x", scaleWidth(2)).attr("y", scaleHeight(30+buttonVertOffset))
+			.attr("width", scaleWidth(buttonWidth)).attr("height", scaleHeight(40))
+			.on("click", function() { if (self.checkpoint > 0) self.checkpoint--; self.update();});
 
-		svg.append("rect")
-		.attr("id", "imageMenuNextButton")
-		.classed("button", true)
-		.attr("fill", "red")
-		.attr("x", scaleWidth(98-buttonWidth)).attr("y", scaleHeight(30+buttonVertOffset))
-		.attr("width", scaleWidth(buttonWidth)).attr("height", scaleHeight(40))
-		.on("click", function() { if (self.checkpoint < self.maxCheckpoint) self.checkpoint++; self.update();});
+			svg.append("line")
+			.classed("unselectable", true)
+			.attr("x1", scaleWidth(2 + 3)).attr("y1", scaleHeight(35+buttonVertOffset))
+			.attr("x2", scaleWidth(2 + 2)).attr("y2", scaleHeight(50+buttonVertOffset))
+			.attr("stroke-width", 2).attr("stroke", "white");
 
-		svg.append("line")
-		.classed("unselectable", true)
-		.attr("x1", scaleWidth(98-buttonWidth + 2)).attr("y1", scaleHeight(35+buttonVertOffset))
-		.attr("x2", scaleWidth(98-buttonWidth + 3)).attr("y2", scaleHeight(50+buttonVertOffset))
-		.attr("stroke-width", 2).attr("stroke", "white");
+			svg.append("line")
+			.classed("unselectable", true)
+			.attr("x1", scaleWidth(2+2)).attr("y1", scaleHeight(50+buttonVertOffset))
+			.attr("x2", scaleWidth(2+3)).attr("y2", scaleHeight(65+buttonVertOffset))
+			.attr("stroke-width", 2).attr("stroke", "white");
 
-		svg.append("line")
-		.classed("unselectable", true)
-		.attr("x1", scaleWidth(98-buttonWidth + 3)).attr("y1", scaleHeight(50+buttonVertOffset))
-		.attr("x2", scaleWidth(98-buttonWidth + 2)).attr("y2", scaleHeight(65+buttonVertOffset))
-		.attr("stroke-width", 2).attr("stroke", "white");
+			svg.append("rect")
+			.attr("id", "imageMenuNextButton")
+			.classed("button", true)
+			.attr("fill", "red")
+			.attr("x", scaleWidth(98-buttonWidth)).attr("y", scaleHeight(30+buttonVertOffset))
+			.attr("width", scaleWidth(buttonWidth)).attr("height", scaleHeight(40))
+			.on("click", function() { if (self.checkpoint < self.maxCheckpoint) self.checkpoint++; self.update();});
+
+			svg.append("line")
+			.classed("unselectable", true)
+			.attr("x1", scaleWidth(98-buttonWidth + 2)).attr("y1", scaleHeight(35+buttonVertOffset))
+			.attr("x2", scaleWidth(98-buttonWidth + 3)).attr("y2", scaleHeight(50+buttonVertOffset))
+			.attr("stroke-width", 2).attr("stroke", "white");
+
+			svg.append("line")
+			.classed("unselectable", true)
+			.attr("x1", scaleWidth(98-buttonWidth + 3)).attr("y1", scaleHeight(50+buttonVertOffset))
+			.attr("x2", scaleWidth(98-buttonWidth + 2)).attr("y2", scaleHeight(65+buttonVertOffset))
+			.attr("stroke-width", 2).attr("stroke", "white");
+		} else if (this.mode == 1) {
+			this.createButton("Low Res", 0, 0, svg, 0);
+			this.createButton("High Res", 1, 0, svg, 7);
+			this.createButton("Time", 0, 1, svg, 1);
+			this.createButton("Variance", 1, 1, svg, 2);
+			this.createButton("Samples", 0, 2, svg, 3);
+			this.createButton("Bounces", 1, 2, svg, 4);
+			this.createButton("Box Intersections", 0, 3, svg, 5);
+			this.createButton("Obj Intersections", 1, 3, svg, 6);
+		}
+	}
+
+	createButton(name, row, column, parent, checkpoint) {
+		let self = this;
+
+		let totalRows = 2;
+		let totalColumns = 4;
+
+		let yScale = d3.scaleLinear().domain([0, 100]).range([0, this.menuWidth]);
+		let xScale = d3.scaleLinear().domain([0, 100]).range([0, this.menuHeight]);
+		let hScale = d3.scaleLinear().domain([0, 100]).range([0, this.menuWidth]);
+		let wScale = d3.scaleLinear().domain([0, 100]).range([0, this.menuHeight]);
+
+		let width = hScale(100 / totalColumns);
+		let height = wScale(100 / totalRows);
+		let x = yScale(100 / totalColumns) * column;
+		let y = xScale(100 / totalRows) * row;
+
+		parent.append("rect").classed("imgbtn", true).classed("button", true).classed("toggled", (this.checkpoint == checkpoint))
+			.attr("x", x).attr("y", y).attr("width", width).attr("height",height)
+			.on("click", function() {
+				self.checkpoint = checkpoint; 
+				self.update();
+			});
+
+		parent.append("text").text(name).classed("unselectable", true)
+			.attr("x", x + width / 2.0).attr("y", y + height / 2.0).classed("p", true)
+			.attr("text-anchor", "middle")
+			.attr("alignment-baseline", "middle");
 	}
 
 	getText(checkpoint) {
@@ -274,14 +317,13 @@ class ImageView {
 		x1 = Math.floor(x1);
 		y1 = Math.floor(y1);
 
-		console.log(" X0 " + x0 + " Y0 " + y0 + " X1 " + x1 + " Y1 " + y1);
-
 		let bounds = [x0, y0, x1, y1];
+
+		
 		this.parallelBarView.updateBounds(bounds);
 	}
 
 	selectPixel(x, y) {
-		
 		/* Small square to show selected pixel*/
 		let xScale = d3.scaleLinear().domain([0, this.dimensions[0]]).range([0, this.height]);
 		let yScale = d3.scaleLinear().domain([0, this.dimensions[0]]).range([0, this.height]);
@@ -293,7 +335,6 @@ class ImageView {
 			.attr("height", this.width / this.dimensions[1])
 			.attr("x", xScale(x))
 			.attr("y", yScale(y));
-
 	}
 
 	hoverPixel(x, y) {
@@ -308,7 +349,6 @@ class ImageView {
 			.attr("height", this.width / this.dimensions[1])
 			.attr("x", xScale(x))
 			.attr("y", yScale(y));
-
 	}
 
 	resize() {
@@ -321,6 +361,16 @@ class ImageView {
     	this.menuHeight = $("#image-menu svg").parent().height();
     	this.menuSVG.attr("width", this.menuWidth).attr("height", this.menuHeight);
 
+		this.update();
+	}
+
+	toggleExploreMode() {
+		this.mode = 1;
+		this.update();
+	}
+
+	toggleStoryMode() {
+		this.mode = 0;
 		this.update();
 	}
 }

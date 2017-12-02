@@ -1,14 +1,15 @@
 /* Function to initialize all visualizations */
 function InitializeAll() {
-	ParallelBarView = new ParallelBarView();
-	ImageView = new ImageView(ParallelBarView);
-	RayTreeView = new RayTreeView();
+	PixelAnalysisView = new PixelAnalysisView();
+	ImageView = new ImageView();
+	ImageView.setParallelBarView(PixelAnalysisView.parallelBarView);
+	PixelAnalysisView.parallelBarView.setImageView(ImageView);
+	PixelAnalysisView.parallelBarView.setRayTreeView(PixelAnalysisView.rayTreeView);
 }
 
 function UpdateAll() {
 	ImageView.update();
-	ParallelBarView.update();
-	RayTreeView.update();
+	PixelAnalysisView.update();
 }
 
 document.addEventListener("DOMContentLoaded", function(event) { 
@@ -20,22 +21,28 @@ document.addEventListener("DOMContentLoaded", function(event) {
 	d3.json("./Data/128/pixeldata.json", function(error, data){
 		console.log(error);
 		console.log(data);
-		ParallelBarView.setData(data.PixelData);
+		PixelAnalysisView.setData(data.PixelData);
 		ImageView.setDimensions(data.PixelData.dimensions);
 		UpdateAll();
 	});
-
-	// d3.json("./Data/64/raydata/.json", function(error, data){
-	// 	console.log(error);
-	// 	console.log(data);
-	// 	RayTreeView.setData(data.RayData);
-	// 	RayTreeView.update();
-	// });
-
 });
 
 window.onresize = function(event) {
-	ParallelBarView.resize();
+	PixelAnalysisView.resize();
     ImageView.resize();
-	// RayTreeView.resize();
 };
+
+d3.select("#story-toggle").on("click", function() {
+	d3.selectAll(".toggled").classed("toggled", false);
+	d3.select(this).classed("toggled", true);
+
+	ImageView.toggleStoryMode();
+	PixelAnalysisView.toggleStoryMode();
+});
+
+d3.select("#explore-toggle").on("click", function() {
+	d3.selectAll(".toggled").classed("toggled", false);
+	d3.select(this).classed("toggled", true);
+	ImageView.toggleExploreMode();
+	PixelAnalysisView.toggleExploreMode();
+});

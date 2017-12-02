@@ -121,11 +121,11 @@ struct RayInfo {
 	std::string toJSON() {
 		//o, d, p, ob, rb, rp, t, c, ch
 		std::string json = "{";
-		json += "\"o\":" + pointToJSON(Origin);
-		json += ",\"d\":" + pointToJSON(Direction);
-		json += ",\"p\":" + pointToJSON(HitPoint);
-		json += ",\"ob\":0";	//TODO: object index
-		json += ",\"rb\":" + std::to_string(numRayBoxIntersections);
+		//json += "\"o\":" + pointToJSON(Origin);
+		//json += ",\"d\":" + pointToJSON(Direction);
+		//json += ",\"p\":" + pointToJSON(HitPoint);
+		//json += ",\"ob\":0";	//TODO: object index
+		json += "\"rb\":" + std::to_string(numRayBoxIntersections);
 		json += ",\"rp\":" + std::to_string(numRayPrimitiveIntersections);
 		json += ",\"t\":" + std::to_string(rayType);
 		json += ",\"c\":" + colorToJSON(colorContribution);
@@ -1090,7 +1090,7 @@ public:
 
 		////RayData
 		int numPixels = width * height;
-		int pixelsPerFile = 128;
+		int pixelsPerFile = (width * height) / 32;
 		int numFiles = numPixels / pixelsPerFile;
 
 		/* ASSUMING SCREEN SIZE IS DIVISABLE BY 64! */
@@ -1101,18 +1101,26 @@ public:
 			//for each pixel
 			for (int i = fileidx * pixelsPerFile; i < (fileidx * pixelsPerFile) + pixelsPerFile; i++) {
 				int numSamples = pixInfo[i]->samples.size();
-				if (i != 0)RayDataJSON += ",";
-				RayDataJSON += "[";
+				if (i != fileidx * pixelsPerFile) RayDataJSON += ",";
+				
+				RayDataJSON += "{\"c\":" + std::string("["
+					+ std::to_string(img[i].r/255.0) + ","
+					+ std::to_string(img[i].g/255.0) + ","
+					+ std::to_string(img[i].b/255.0) + "],");
+
+				RayDataJSON += "\"ch\":[";
+
+				
+
 				//for each sample
 				for (int s = 0; s < numSamples; s++) {
 					RayDataJSON += pixInfo[i]->samples[s]->toJSON();
 					if (s != numSamples - 1) RayDataJSON += ",";
 				}
-				RayDataJSON += "]";
+				RayDataJSON += "]}";
 			}
 
-			RayDataJSON += "]";
-			RayDataJSON += "}";
+			RayDataJSON += "]}";
 			std::ofstream out2(dirname + std::string("raydata" + std::to_string(fileidx) + ".json"));
 			out2 << RayDataJSON;
 			out2.close();
