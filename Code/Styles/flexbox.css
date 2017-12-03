@@ -1,34 +1,53 @@
 /* Columns for Sidebar, Viewport, and Pixel Analysis Chart */
 @media screen and (orientation:portrait) {
+	html {
+		height: 220vw;
+		width: 100%;
+	}
+
+	body {
+		height: 220vw;
+		width: 100%;
+	}
+
 	#main-container {
 		display: flex;
 		flex-direction: column;
-		align-content: center;
+		align-items: center;
 		margin: 0px;
-		width: 100vw;
 	}
 
 	#sidebar{
 		/*flex-basis: 50px;*/
 		height: 20vw;
 		width: 80vw;
-		padding-left: 10vw;
-		padding-right: 10vw;
+		/*padding-left: 10vw;*/
+		/*padding-right: 10vw;*/
 	}
 
 	#image-column {
 		/*flex-basis: 50%;*/
-		width: 100vmin;
-		height: 100vmin;
+		width: 80vw;
+		height: 100vw;
 	}
 
 	#pixel-analysis-column{
 		/*flex-basis: 50%;*/
-		width: 100vmin;
-		height: 100vmin;
+		width: 80vw;
+		height: 100vw;
 	}
 }
 @media screen and (orientation:landscape) { 
+	html {
+		height: 100%;
+		width: : 100%;
+	}
+
+	body {
+		height: 100%;
+		width: 100%;
+	}
+
 	#main-container {
 		display: flex;
 		flex-direction: row;
@@ -39,7 +58,7 @@
 
 	#sidebar{
 		width: 13vw;
-		height: 40vw;
+		height: 45vw;
 		padding-right: 2vw;
 	}
 
@@ -67,14 +86,16 @@
 	}
 
 	#story-toggle{
-		flex-basis: 50%;
+		height: 10vw;
+		width: 40vw;
 
 		display: flex;
 		justify-content: center;
 		align-items: center;
 	}
 	#explore-toggle{
-		flex-basis: 50%;
+		height: 10vw;
+		width: 40vw;
 
 		display: flex;	
 		justify-content: center;
@@ -155,9 +176,12 @@
 	#image-column {
 		display: flex;
 		flex-direction: column;
+		height: 45vw;
+		width: 38vw;
 	}
 	#image-menu {
-		flex-basis: 7vw;
+		height: 7vw;
+		width: 38vw;
 
 		display: flex;
 		justify-content: center;
@@ -165,6 +189,7 @@
 	}
 	#image-viewport {
 		height: 38vw;
+		width: 38vw;
 		
 		display: flex;
 		justify-content: center;
@@ -202,9 +227,13 @@
 	#pixel-analysis-column {
 		display: flex;
 		flex-direction: column;
+
+		height: 45vw;
+		width: 38vw;
 	}
 	#pixel-analysis-menu {
-		flex-basis: 7vw;
+		height: 7vw;
+		width: 38vw;
 
 		display: flex;
 		justify-content: center;
@@ -212,7 +241,7 @@
 	}
 	#pixel-analysis-viewport {
 		height: 38vw;
-		/*height: 100%;*/
+		width: 38vw;
 		
 		display: flex;
 		justify-content: center;

@@ -20,7 +20,7 @@ class RayTreeView {
 			this.svg.selectAll("text").remove();
 
 			this.svg.append("text")
-				.text("Select a pixel to see it's samples here.")
+				.text("Select a pixel to see its samples here.")
 				.classed("h", true)
 				.attr("text-anchor", "middle")
 				.attr("x", this.width / 2.0)

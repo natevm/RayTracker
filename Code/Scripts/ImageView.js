@@ -186,7 +186,7 @@ class ImageView {
 		    case 2:
 		        return {"header": "Color Variance",
 		        "l1": "Color variance occurs when multiple objects, or detailed textures all",
-		    	"l2": "lie within the boundries of a pixel. This can cause aliasing, since ",
+		    	"l2": "lie within the boundaries of a pixel. This can cause aliasing, since ",
 		    	"l3": "one ray might lead to a poor estimation of a pixel's true color."
 		    };
 		    case 3:
